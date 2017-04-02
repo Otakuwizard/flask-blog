@@ -39,6 +39,39 @@ class User(db.Model):
     posts = db.relationship('Post', backref='author', lazy='dynamic')
     comments = db.realtionship('Comment', backref='author', lazy='dynamic')
     
+    @property
+    def password(self):
+        raise AttributeError('Password is not a readable attribute.')
+    
+    @password.setter
+    def password(self, password):
+        self.password_hash = generate_password_hash(password)
+        
+    def verify_password(self, password):
+        return check_password_hash(self.password_hash, password)
+    
+    def ping(self):
+        self.last_login = datetime.utcnow()
+        db.session.add(self)
+        
+    def generate_confirm_token(self, expiration=3600):
+        s = Serializer(current_app.config['SECRET_KEY'], expiration)
+        set = dict(confirm=self.id)
+        return s.dumps(set)
+        
+    def confirm(self, token):
+        s = Serializer(current_app.config['SECRET_KEY'])
+        try:
+            data = s.loads(token)
+        except:
+            return False
+        if ! data.get('confirm') or data.get('confirm') != self.id:
+            return False
+        self.get.('confirmed') = True
+        db.session.add(self)
+        return True
+        
+    
 class Post(db.Model):
     __tablename__ = 'posts'
     id = db.Column(db.String(64), primary_key=True, default=generate_id)
