@@ -1,0 +1,7 @@
+{% extends "__base__.html" %}
+{% block title %}{{ super() }} - Home{% endblock %}
+{% block page_content %}
+<div class="page-header">
+	<h1>Hello {% is current_user.is_authenticated %} {{ current_user.user_name }} {% else %} Stranger {% endif %}!</h1>
+</div>
+{% endblock %}
