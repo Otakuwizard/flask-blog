@@ -16,13 +16,39 @@ def generate_id():
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(user_id)
+    
+class Permission:
+    FOLLOW = 0x01
+    WRITE_ARTICLES = 0x02
+    COMMENTS = 0x04
+    MODERATE_COMMENTS = 0x08
+    ADMINISTER = 0xff
   
 class Role(db.Model):
     __tablename__ = 'roles'
     id = db.Column(db.String(64), primary_key=True, default=generate_id)
     name = db.Column(db.String(32), unique=True)
     default = db.Column(db.Boolean, default=False, index=True)
+    permission = db.Column(db.Integer)
     users = db.relationship('User', backref='role', lazy='dynamic')
+    
+    @staticmethod
+    def insert_roles():
+        roles = {
+            'administrator': [0xff, False],
+            'moderator': [Permission.FOLLOW | Permission.WRITE_ARTICLES | Permission.COMMENTS | Permission.MODERATE_COMMENTS, False],
+            'user': [Permission.FOLLOW | Permission.WRITE_ARTICLES | Permission.COMMENTS, True]
+        }
+        
+        for r in roles:
+            role = Role.query.filter_by(name=r).first()
+            if role is None:
+                role = Role(id=generate_id(), name=)
+                role.permission = roles[r][0]
+                role.default = roles[r][1]
+            db.session.add(role)
+        db.session.commit()
+            
   
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
@@ -39,6 +65,15 @@ class User(UserMixin, db.Model):
     role_id = db.Column(db.String(64), db.ForeignKey('roles.id'))
     posts = db.relationship('Post', backref='author', lazy='dynamic')
     comments = db.relationship('Comment', backref='author', lazy='dynamic')
+    
+    def __init__(self, **kw):
+        super(User, self).__init__(**kw)
+        if self.role is None:
+            if self.email == current_app.config['FLABY_ADMIN']:
+                self.role = Role.query.filter_by(permission=0xff).first()
+            else:
+                self.role = Role.query.filter_by(default=True).first()
+        
     
     @property
     def password(self):
@@ -71,7 +106,12 @@ class User(UserMixin, db.Model):
         self.confirmed = True
         db.session.add(self)
         return True
+    
+    def can(self, permission):
+        return self.role is not None and (self.role.permission & permission) == permission
         
+    def is_administrator(self):
+        return self.can(0xff)
     
 class Post(db.Model):
     __tablename__ = 'posts'
