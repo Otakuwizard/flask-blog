@@ -1,5 +1,5 @@
-from falsk import Blueprint
+from flask import Blueprint
 
-auht = Blueprint('auth', __name__)
+auth = Blueprint('auth', __name__)
 
 from . import views

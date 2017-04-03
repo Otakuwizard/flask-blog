@@ -1,14 +1,14 @@
 from flask import request, render_template, url_for, redirect, current_app, flash, abort
 from . import auth
 from flask_login import current_user, login_required, login_user, logout_user
-from ..models.py import User
-from ..email.py import send_mail
+from ..models import User
+from ..email import send_mail
 from .. import db
 from .forms import LoginForm, RegisterForm
 
 @auth.before_app_request
 def before_request():
-    if current_user.authenticated:
+    if current_user.is_authenticated:
         current_user.ping()
         if not current_user.confirmed and \
                 reuqest.endpoint and request.endpoint[:5] == 'auth.' \
@@ -23,13 +23,14 @@ def unconfirmed():
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
-    form = LoginForm
+    form = LoginForm()
     if form.validate_on_submit():
         email = form.email.data
         user = User.query.filter_by(email=email).first()
         if user is not None and user.verify_password(form.password.data):
+            #user.is_active = True
             login_user(user, form.remember_me.data)
-            falsh('Authentication Succeed')
+            flash('Authentication Succeed')
             return redirect(request.args.get('next') or url_for('main.index'))
         flash('Authentication Failed')
     return render_template('auth/login.html', form=form)

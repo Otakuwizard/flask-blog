@@ -8,13 +8,14 @@ from datetime import datetime
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from markdown import markdown
 import bleach
+from . import login_manager
 
 def generate_id():
-    return '%015d%s000' % (int(time.time()*1000), uuid.uuid4().hex())
+    return '%015d%s000' % (int(time.time()*1000), uuid.uuid4().hex)
     
 @login_manager.user_loader
-def load_user(id):
-    return User.query.get(id)
+def load_user(user_id):
+    return User.query.get(user_id)
   
 class Role(db.Model):
     __tablename__ = 'roles'
@@ -23,7 +24,7 @@ class Role(db.Model):
     default = db.Column(db.Boolean, default=False, index=True)
     users = db.relationship('User', backref='role', lazy='dynamic')
   
-class User(db.Model):
+class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.String(64), primary_key=True, default=generate_id)
     user_name = db.Column(db.String(32), index=True, unique=True)
@@ -37,7 +38,7 @@ class User(db.Model):
     last_login = db.Column(db.DateTime(), default=datetime.utcnow)
     role_id = db.Column(db.String(64), db.ForeignKey('roles.id'))
     posts = db.relationship('Post', backref='author', lazy='dynamic')
-    comments = db.realtionship('Comment', backref='author', lazy='dynamic')
+    comments = db.relationship('Comment', backref='author', lazy='dynamic')
     
     @property
     def password(self):
@@ -65,9 +66,9 @@ class User(db.Model):
             data = s.loads(token)
         except:
             return False
-        if ! data.get('confirm') or data.get('confirm') != self.id:
+        if not data.get('confirm') or data.get('confirm') != self.id:
             return False
-        self.get.('confirmed') = True
+        self.confirmed = True
         db.session.add(self)
         return True
         

@@ -6,4 +6,5 @@
 	<h1>Please Log In</h1>
 </div>
 {{ wtf.quick_form(form) }}
+<p><a class="btn" href="{{ url_for('auth.register') }}">Register</a></p>
 {% endblock %}

@@ -18,7 +18,7 @@
 			</ul>
 			<ul class="nav navbar-nav navbar-right">
 				{%if current_user.is_authenticated %}
-				<li><a href="{{ url_for('auht.logout') }}">Log Out</a></li>
+				<li><a href="{{ url_for('auth.logout') }}">Log Out</a></li>
 				{% else %}
 				<li><a href="{{ url_for('auth.login') }}">Log In</a></li>
 				{% endif %}
@@ -30,7 +30,7 @@
 
 {% block content %}
 <div class="container">
-	{% for meaasge in get_flashed_messages() %}
+	{% for message in get_flashed_messages() %}
 	<div class="alert alert-warning">
 		<button class="close" type="button" data-dismiss="alert">&times;</button>
 		{{ message }}
