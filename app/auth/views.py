@@ -48,7 +48,8 @@ def register():
         new_user = User(user_name=form.user_name.data,
                         email=form.email.data,
                         password=form.password1.data,
-                        )
+                        name=form.name.data,
+                        location=form.location.data)
         db.session.add(new_user)
         db.session.commit()
         send_mail(new_user.email, 'Account Confirm', 'mail/auth/register', user=new_user, token=new_user.generate_confirm_token())
