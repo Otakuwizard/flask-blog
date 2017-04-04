@@ -90,9 +90,10 @@ class User(UserMixin, db.Model):
         self.last_login = datetime.utcnow()
         db.session.add(self)
         
-    def generate_confirm_token(self, expiration=3600):
+    def generate_confirm_token(self, expiration=3600, **kw):
         s = Serializer(current_app.config['SECRET_KEY'], expiration)
-        set = dict(confirm=self.id)
+        set = dict(**kw)
+        set['confirm'] = self.id
         return s.dumps(set)
         
     def confirm(self, token):
@@ -104,6 +105,7 @@ class User(UserMixin, db.Model):
         if not data.get('confirm') or data.get('confirm') != self.id:
             return False
         self.confirmed = True
+        self.email = data.get('email') if data.get('email') is not None else self.email
         db.session.add(self)
         return True
     
