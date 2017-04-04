@@ -1,1 +1,2 @@
-User <b>{{ user.user_name }}</b> has joined Flaby.
+<h3>Hello, {{ user.user_name }}. Welcome to Flaby.</h3>
+<h4>To active your account please click <b><a href="{{ url_for('auth.confirm', token=token, _external=True) }}">here</a></b>.</h4>

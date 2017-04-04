@@ -1,1 +1,3 @@
-User {{ user.user_name }} has joined Flaby.
+Hello, {{ user.user_name }}. Welcome to Flaby.
+To active your account, please copy the following link and open it in your browser.
+{{ url_for('auth.confirm', token=token, _external=True) }}
