@@ -3,6 +3,7 @@ from flask_login import current_user, login_required
 from ..models import User, Post, Comment, Permission
 from . import main
 from ..decrator import permission.required, admin_required
+from .forms import ProfileEditForm, ProfileEditAdminForm
 
 @main.route('/')
 def index():
@@ -37,7 +38,7 @@ def profile_edit():
 @admin_required
 def profile_edit_admin(id)
     user = User.query.get_or_404(id)
-    form = ProfileEditAdminForm()
+    form = ProfileEditAdminForm(user=user)
     if form.validate_on_submit():
         user.email = form.email.data
         user.user_name = form.user_name.data
