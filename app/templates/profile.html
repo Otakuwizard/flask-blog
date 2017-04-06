@@ -1,0 +1,31 @@
+{% extends "__base__.html" %}
+{% block title %}{{ super() }} - Profile{% endblock %}
+{% block page_content %}
+<div class="page-header">
+	<img src="{{ user.gravatar() }}">
+	<h1>{{ user.user_name }}</h1>
+	{% if user.name or user.location %}
+	<p>
+		{% if user.name %}{{ user.name }}<br>{% endif %}
+		{% if user.location %}
+		<a href="http://maps.google.com/?q={{ user.location }}">{{ user.location }}</a>
+		{% endif %}
+	</p>
+	{% endif %}
+	{% if user.is_administrator() %}
+	<p><a href="mailto:{{ user.email }}">{{ user.email }}</a></p>
+	{% endif %}
+	{%if user.about_me %}
+	<p>{{ user.about_me }}</p>
+	{% endif %}
+	<p>
+		Register At {{ moment(user.register_at).format('L') }}.<br>
+		Last Login {{ moment(user.last_login).fromNow() }}.
+	</p>
+	{% if user.is_administrator() %}
+	<p><a href="url_for('main.profile_edit', id=user.id)">Profile Edit[Admin]</a></p>
+	{% elif user == current_user %}
+	<p><a href="{{ url_for('main.profile_edit') }}">Profile Edit</a></p>
+	{% endif %}
+<div>
+{% endblock %}
