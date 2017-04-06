@@ -8,6 +8,7 @@ from datetime import datetime
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from markdown import markdown
 import bleach
+import hashlib
 from . import login_manager
 
 def generate_id():
@@ -65,6 +66,7 @@ class User(UserMixin, db.Model):
     role_id = db.Column(db.String(64), db.ForeignKey('roles.id'))
     posts = db.relationship('Post', backref='author', lazy='dynamic')
     comments = db.relationship('Comment', backref='author', lazy='dynamic')
+    avatar_hash = db.Column(db.String(32))
     
     def __init__(self, **kw):
         super(User, self).__init__(**kw)
@@ -73,6 +75,8 @@ class User(UserMixin, db.Model):
                 self.role = Role.query.filter_by(permission=0xff).first()
             else:
                 self.role = Role.query.filter_by(default=True).first()
+        if self.email is not None and self.avatar_hash is None:
+            self.avatar_hash = hashlib.md5(self.email.encode('utf-8')).hexdigest()
         
     
     @property
@@ -106,6 +110,7 @@ class User(UserMixin, db.Model):
             return False
         self.confirmed = True
         self.email = data.get('email') if data.get('email') is not None else self.email
+        self.avatar_hash = hashlib.md5(self.email.encode('utf-8')).hexdigest()
         db.session.add(self)
         return True
     
@@ -114,6 +119,14 @@ class User(UserMixin, db.Model):
         
     def is_administrator(self):
         return self.can(0xff)
+        
+    def gravatar(self, size=100, default='identicon', rating='g'):
+        if request.is_secure:
+            url = 'https://secure.gravatar.com/avatar'
+        else:
+            url = 'http://www.gravatar.com/avatar'
+        hash = self.avatar_hash or hashlib.md5(self.email.encode('utf-8')).hexdigest()
+        return '{url}/{hash}?s={size}&d={default}&r={rating}'.format(url=url, hash=hash, default=default, rating=rating)
     
 class Post(db.Model):
     __tablename__ = 'posts'
@@ -130,3 +143,12 @@ class Comment(db.Model):
     created_at = db.Column(db.DateTime(), default=datetime.utcnow)
     auhtor_id = db.Column(db.String(64), db.ForeignKey('users.id'))
     post_id = db.Column(db.String(64), db.ForeignKey('posts.id'))
+
+class AnonymousUser(AnonymousUserMixin):
+    def can(self, permission):
+        return False
+    
+    def is_administrator(self):
+        return False
+    
+login_manager.anonymous_user = AnonymousUser
