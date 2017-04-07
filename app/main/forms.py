@@ -4,6 +4,8 @@ from wtforms.validators import Required, Email, Length, EqualTo, Regexp
 from ..models import Role, User
 
 class ProfileEditForm(FlaskForm):
+    user_name = StringField('Username', validators=[Required(), Length(1, 64), Regexp('^[0-9a-zA-Z\_\.]+$', 0, 
+                            'Usernames must hane only letters, numbers, dots or underscores.')])
     name = StringField('Your real name', validators=[Length(0, 64)])
     location = StringField('From', validators=[Length(0, 64)])
     about_me = TextAreaField('about me')
@@ -17,7 +19,7 @@ class ProfileEditAdminForm(FlaskForm):
     name = StringField('Real Name', validators=[Length(0, 64)])
     location = StringField('From', validators=[Length(0, 64)])
     about_me = TextAreaField('About User')
-    role = SelectField('Role', coerce=int)
+    role = SelectField('Role')
     submit = SubmitField('Confirm')
     
     def __init__(self, user, *args, **kw):
@@ -29,6 +31,6 @@ class ProfileEditAdminForm(FlaskForm):
         if self.user.user_name != field.data and User.query.filter_by(user_name=field.data).first():
             raise ValidationError('username already in used')
     
-    def validate_email(selfm field):
+    def validate_email(self, field):
         if self.user.email != field.data and User.query.filter_by(email=field.data).first():
             raise ValidationError('email already in used')

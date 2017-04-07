@@ -43,15 +43,15 @@ class PasswordChangeForm(FlaskForm):
             raise ValidationError('Invalid Password')
             
 class EmailChangeForm(FlaskForm):
-    email = StringField('New Email', validators=[Reauired(), Email(), Length(1, 64)])
+    email = StringField('New Email', validators=[Required(), Email(), Length(1, 64)])
     submit = SubmitField('Confirm')
     
     def validate_email(self, field):
-        if User.query.filter_by(Email=field.data).first():
+        if User.query.filter_by(email=field.data).first():
             raise ValidationError('Email already in used.')
             
 class PasswordResetEmailForm(FlaskForm):
-    email = StringField('Your Login Email', validator=[Required(), Email(), Length(1, 64)])
+    email = StringField('Your Login Email', validators=[Required(), Email(), Length(1, 64)])
     submit = SubmitField('Send Token')
     
 class PasswordResetForm(FlaskForm):

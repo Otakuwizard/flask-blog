@@ -15,9 +15,12 @@
 		<div class="navbar-collapse collapse">
 			<ul class="nav navbar-nav">
 				<li><a href="{{ url_for('main.index') }}">Home</a></li>
+				<li><a href="{{ url_for('main.profile', username=current_user.user_name) }}">Profile</a></li>
 			</ul>
 			<ul class="nav navbar-nav navbar-right">
 				{%if current_user.is_authenticated %}
+				<li><a href="{{ url_for('auth.email_change') }}">Email Change</a></li>
+				<li><a href="{{ url_for('auth.password_change') }}">Password Change</a><li>
 				<li><a href="{{ url_for('auth.logout') }}">Log Out</a></li>
 				{% else %}
 				<li><a href="{{ url_for('auth.login') }}">Log In</a></li>

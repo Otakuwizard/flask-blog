@@ -44,7 +44,7 @@ class Role(db.Model):
         for r in roles:
             role = Role.query.filter_by(name=r).first()
             if role is None:
-                role = Role(id=generate_id(), name=)
+                role = Role(id=generate_id(), name=r)
                 role.permission = roles[r][0]
                 role.default = roles[r][1]
             db.session.add(role)
@@ -126,7 +126,7 @@ class User(UserMixin, db.Model):
         else:
             url = 'http://www.gravatar.com/avatar'
         hash = self.avatar_hash or hashlib.md5(self.email.encode('utf-8')).hexdigest()
-        return '{url}/{hash}?s={size}&d={default}&r={rating}'.format(url=url, hash=hash, default=default, rating=rating)
+        return '{url}/{hash}?s={size}&d={default}&r={rating}'.format(url=url, hash=hash, size=size, default=default, rating=rating)
     
 class Post(db.Model):
     __tablename__ = 'posts'

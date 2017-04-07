@@ -2,7 +2,7 @@
 {% block title %}{{ super() }} - Profile{% endblock %}
 {% block page_content %}
 <div class="page-header">
-	<img src="{{ user.gravatar() }}">
+	<img class="img-rounded" src="{{ user.gravatar() }}">
 	<h1>{{ user.user_name }}</h1>
 	{% if user.name or user.location %}
 	<p>
@@ -23,7 +23,7 @@
 		Last Login {{ moment(user.last_login).fromNow() }}.
 	</p>
 	{% if user.is_administrator() %}
-	<p><a href="url_for('main.profile_edit', id=user.id)">Profile Edit[Admin]</a></p>
+	<p><a href="{{ url_for('main.profile_edit_admin', id=user.id) }}">Profile Edit[Admin]</a></p>
 	{% elif user == current_user %}
 	<p><a href="{{ url_for('main.profile_edit') }}">Profile Edit</a></p>
 	{% endif %}

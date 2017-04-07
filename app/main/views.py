@@ -2,7 +2,7 @@ from flask import render_template, redirect, url_for, request, current_app
 from flask_login import current_user, login_required
 from ..models import User, Post, Comment, Permission
 from . import main
-from ..decrator import permission.required, admin_required
+from ..decrator import permission_required, admin_required
 from .forms import ProfileEditForm, ProfileEditAdminForm
 
 @main.route('/')
@@ -36,7 +36,7 @@ def profile_edit():
 @main.route('/profile_edit/<id>', methods=['GET', 'POST'])
 @login_required
 @admin_required
-def profile_edit_admin(id)
+def profile_edit_admin(id):
     user = User.query.get_or_404(id)
     form = ProfileEditAdminForm(user=user)
     if form.validate_on_submit():

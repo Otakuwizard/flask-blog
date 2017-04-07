@@ -11,9 +11,10 @@ from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 def before_request():
     if current_user.is_authenticated:
         current_user.ping()
-        if not current_user.confirmed and \
-                reuqest.endpoint and request.endpoint[:5] == 'auth.' \
-                and request.point != 'static':
+        if not current_user.confirmed \
+                and request.endpoint \
+                and request.endpoint[:5] != 'auth.' \
+                and request.endpoint != 'static':
             return redirect(url_for('.unconfirmed'))
             
 @auth.route('/unconfirmed')
@@ -73,7 +74,7 @@ def confirm(token):
 @login_required
 def resend_mail():
     user = current_user._get_current_object()
-    send_mail(new_user.email, 'Account Confirm', 'mail/auth/register', user=user, token=user.generate_confirm_token())
+    send_mail(user.email, 'Account Confirm', 'mail/auth/register', user=user, token=user.generate_confirm_token())
     flash('A confirmation email has been sent to your email box')
     return redirect(url_for('main.index'))
     
@@ -128,5 +129,5 @@ def password_reset(token):
         db.session.add(user)
         flash('Your password has been reseted, please login again.')
         send_mail(user.email, 'Password Reseted', 'mail/auth/password_reset', user=user)
-        return redirect('.login')
+        return redirect(url_for('.login'))
     return render_template('auth/password_reset.html', form=form)
