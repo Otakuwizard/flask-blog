@@ -1,5 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import ValidationError, StringField, BooleanField, TextAreaField, SelectField, SubmitField
+from flask_pagedown.fields import PageDownField
 from wtforms.validators import Required, Email, Length, EqualTo, Regexp
 from ..models import Role, User
 
@@ -34,3 +35,11 @@ class ProfileEditAdminForm(FlaskForm):
     def validate_email(self, field):
         if self.user.email != field.data and User.query.filter_by(email=field.data).first():
             raise ValidationError('email already in used')
+            
+class PostCreateForm(FlaskForm):
+    body = PageDownField('Share your mind.', validators=[Required()])
+    submit = SubmitField('Submit')
+    
+class CommentCreateForm(FlaskForm):
+    body = PageDownField('Your comment', validators=[Required()])
+    submit = SubmitField('Submit')

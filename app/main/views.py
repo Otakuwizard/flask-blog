@@ -3,7 +3,7 @@ from flask_login import current_user, login_required
 from ..models import User, Post, Comment, Permission
 from . import main
 from ..decrator import permission_required, admin_required
-from .forms import ProfileEditForm, ProfileEditAdminForm
+from .forms import ProfileEditForm, ProfileEditAdminForm, PostCreateForm, CommentCreateForm
 
 @main.route('/')
 def index():
@@ -60,4 +60,39 @@ def profile_edit_admin(id):
     form.role.data = user.role_id
     return render_template('profile_edit_admin.html', form=form)
     
+@main.route('/post-create', methods=['GET', 'POST'])
+@login_required
+@permission_required(Permission.WRITE_ARTICLES)
+def post_create():
+    form = PostCreateForm()
+    if form.validate_on_submit():
+        post = Post(body=form.body.data,
+                    author=current_user._get_current_object())
+        db.session.add(post)
+        db.session.commit()
+        flash('A new post has been created.')
+        return redirect(url_for('.post', id=post.id))
+    return render_template('post_create.html', form=form)
+    
+@main.route('/post/<id>')
+def post(id):
+    post = Post.query.get_or_404(id)
+    return render_template('post.html', post=post)
+
+@main.route('/comment-create/<post_id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(Permission.COMMENTS)
+def comment_create(post_id):
+    post = Post.query.get_or_404(post_id)
+    form = CommentCreateForm()
+    if form.validate_on_submit():
+        comment = Comment(body=form.body.data,
+                          author=current_user._get_current_object(),
+                          post=post)
+        db.session.add(comment)
+        db.session.commit()
+        flash('You have created a new comment.')
+        return redirect(url_for('.post', id=post_id))
+    return render_template('comment_create.html')
+        
     
