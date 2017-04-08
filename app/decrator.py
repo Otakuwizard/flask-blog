@@ -15,3 +15,4 @@ def permission_required(permission):
     
 def admin_required(fn):
     return permission_required(Permission.ADMINISTER)(fn)
+    

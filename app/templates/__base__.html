@@ -1,5 +1,11 @@
 {% extends "bootstrap/base.html" %}
 {% block title %}Flaby{% endblock %}
+{% block head %}
+{{ super() }}
+<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" class="image/icon">
+<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" class="image/x-icon">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+{% endblock %}
 {% block navbar %}
 <div class="navbar navbar-inverse" role="navigation">
 	<div class="container">
@@ -15,7 +21,10 @@
 		<div class="navbar-collapse collapse">
 			<ul class="nav navbar-nav">
 				<li><a href="{{ url_for('main.index') }}">Home</a></li>
+				{% if current_user.is_authenticated %}
+				<li><a href="{{ url_for('main.post_create') }}">New Post</a></li>
 				<li><a href="{{ url_for('main.profile', username=current_user.user_name) }}">Profile</a></li>
+				{% endif %}
 			</ul>
 			<ul class="nav navbar-nav navbar-right">
 				{%if current_user.is_authenticated %}

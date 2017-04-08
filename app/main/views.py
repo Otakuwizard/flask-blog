@@ -73,16 +73,9 @@ def post_create():
         flash('A new post has been created.')
         return redirect(url_for('.post', id=post.id))
     return render_template('post_create.html', form=form)
-    
-@main.route('/post/<id>')
-def post(id):
-    post = Post.query.get_or_404(id)
-    return render_template('post.html', post=post)
 
-@main.route('/comment-create/<post_id>', methods=['GET', 'POST'])
-@login_required
-@permission_required(Permission.COMMENTS)
-def comment_create(post_id):
+@main.route('/post/<id>', methods=['GET', 'POST'])
+def post(id):
     post = Post.query.get_or_404(post_id)
     form = CommentCreateForm()
     if form.validate_on_submit():
@@ -93,6 +86,6 @@ def comment_create(post_id):
         db.session.commit()
         flash('You have created a new comment.')
         return redirect(url_for('.post', id=post_id))
-    return render_template('comment_create.html')
+    return render_template('post.html', post=post, form=form)
         
     
