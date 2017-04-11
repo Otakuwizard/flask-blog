@@ -1,18 +1,34 @@
-from flask import render_template, redirect, url_for, request, current_app
+from flask import render_template, redirect, url_for, request, current_app, flash
 from flask_login import current_user, login_required
 from ..models import User, Post, Comment, Permission
 from . import main
 from ..decrator import permission_required, admin_required
 from .forms import ProfileEditForm, ProfileEditAdminForm, PostCreateForm, CommentCreateForm
+from .. import db
 
-@main.route('/')
+@main.route('/', methods=['GET', 'POST'])
 def index():
-    return render_template('index.html')
+    form = PostCreateForm()
+    if form.validate_on_submit():
+        post = Post(body=form.body.data,
+                    author=current_user._get_current_object(),
+                    )
+        db.session.add(post)
+        db.session.commit()
+        flash('A new post has been created.')
+        return redirect(url_for('.index'))
+    page = request.atgs.get('page', 1, type=int)
+    pagination = Post.query.order_by(Post.created_at.desc()).paginate(page, per_page=current_app.config.get('FLABY_POSTS_PER_PAGE', 10), error_out=False)
+    posts = pagination.items
+    return render_template('index.html', posts=posts, pagination=pagination, form=form)
     
 @main.route('/profile/<username>')
 def profile(username):
     user = User.query.filter_by(user_name=username).first_or_404()
-    return render_template('profile.html', user=user)
+    page = request.args.get('page', 1, type=int)
+    pagination = user.posts.order_by(Post.created_at.desc()).paginate(page, per_page=current_app.config.get('FLABY_POSTS_PER_PAGE', 10), error_out=False)
+    posts = pagination.items
+    return render_template('profile.html', user=user, posts=posts, pagination=pagination)
     
 @main.route('/profile-edit', methods=['GET', 'POST'])
 @login_required
@@ -76,7 +92,7 @@ def post_create():
 
 @main.route('/post/<id>', methods=['GET', 'POST'])
 def post(id):
-    post = Post.query.get_or_404(post_id)
+    post = Post.query.get_or_404(id)
     form = CommentCreateForm()
     if form.validate_on_submit():
         comment = Comment(body=form.body.data,
@@ -85,7 +101,38 @@ def post(id):
         db.session.add(comment)
         db.session.commit()
         flash('You have created a new comment.')
-        return redirect(url_for('.post', id=post_id))
+        return redirect(url_for('.post', id=id))
     return render_template('post.html', post=post, form=form)
         
-    
+@main.route('/comments-moderate')
+@login_required
+@permission_required(Permission.COMMENTS_MODERATE)
+def comments_moderate():
+    page = request.args.get('page', 1, type=int)
+    pagination = Comments.query.filter_by(Comment.created_at.desc()).paginate(page, per_page=current_app.config.get('FLABY_COMMENTS_PER_PAGE', 15), error_out=False)
+    comments = pagination.items
+    return render_template('comments_moderate.html', comments=comments, pagination=pagination)
+
+@main.route('/comment_disabled/<id>')
+@login_required
+@permission_required(Permission.COMMENTS_MODERATE)
+def comment_disabled():
+    comment = Comment.query.get_or_404(id)
+    page = request.args.get('page', 1, type=int)
+    comment.disabled = True
+    db.session.add(comment)
+    db.session.commit()
+    flash('The comment has been disabled.')
+    return redirect(url_for('.comments_moderate', page=page)
+
+@main.route('/comment_enabled/<id>')
+@login_required
+@permission_required(Permission.COMMENTS_MODERATE)
+def comment_enabled():
+    comment = Comment.query.get_or_404(id)
+    page = request.args.get('page', 1, type=int)
+    comment.disabled = False
+    db.session.add(comment)
+    db.session.commit()
+    flash('The comment has been enabled.')
+    return redirect(url_for('.comments_moderate', page=page)    

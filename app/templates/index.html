@@ -1,7 +1,22 @@
 {% extends "__base__.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "_macros.html" as macros %}
 {% block title %}{{ super() }} - Home{% endblock %}
 {% block page_content %}
 <div class="page-header">
 	<h1>Hello {% if current_user.is_authenticated %} {{ current_user.user_name }} {% else %} Stranger {% endif %}!</h1>
 </div>
+<div>
+{% if current_user.can(Permission.WRITE_ARTICLES) %}
+	{{ wtf.quick_form(form)}}
+{% endif %}
+</div>
+{% include "_posts.html" %}
+{% if pagination %}
+	{{ macros.pagination_widget(pagination, '.index') }}
+{% endif %}
+{% endblock %}
+{% block scripts %}
+{{ super() }}
+{{ pagedown.include_pagedown() }}
 {% endblock %}

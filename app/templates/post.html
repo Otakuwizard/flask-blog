@@ -2,14 +2,14 @@
 {% import "bootstrap/wtf.html" as wtf %}
 {% block scripts %}
 {{ super() }}
-{{ pagedown.include_page_down() }}
+{{ pagedown.include_pagedown() }}
 {% endblock %}
 {% block title %}{{ super() }} - Post{% endblock %}
 {% block page_content %}
 <div class="col-md-8">
 	<img class="img-rounded" src="{{ post.author.gravatar() }}">
 	<div class="post-author">
-		<P><a href="{{ url_for('main.profile', username=post.author.user_name)">{{ post.author.user_name }}</a></p>
+		<P><a href="{{ url_for('main.profile', username=post.author.user_name) }}">{{ post.author.user_name }}</a></p>
 	</div>
 	<div class="post-content">
 		<p>{% if post.body_html %}{{ post.body_html }}{% else %}{{ post.body }}{% endif %}</p>
@@ -18,7 +18,6 @@
 		<p>created at {{ moment(post.created_at).fromNow() }}</p>
 	</div>
 	<br>
-	{% include "_comments.html" %}
 	<div {% if not current_user.is_authenticated %}class="disabled" {% endif %}>
 		<p>Add Comment</p>
 		{{ wtf.quick_form(form) }}
