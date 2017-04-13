@@ -17,7 +17,7 @@ def index():
         db.session.commit()
         flash('A new post has been created.')
         return redirect(url_for('.index'))
-    page = request.atgs.get('page', 1, type=int)
+    page = request.args.get('page', 1, type=int)
     pagination = Post.query.order_by(Post.created_at.desc()).paginate(page, per_page=current_app.config.get('FLABY_POSTS_PER_PAGE', 10), error_out=False)
     posts = pagination.items
     return render_template('index.html', posts=posts, pagination=pagination, form=form)
@@ -76,19 +76,21 @@ def profile_edit_admin(id):
     form.role.data = user.role_id
     return render_template('profile_edit_admin.html', form=form)
     
-@main.route('/post-create', methods=['GET', 'POST'])
+@main.route('/post-edit/<id>', methods=['GET', 'POST'])
 @login_required
 @permission_required(Permission.WRITE_ARTICLES)
-def post_create():
+def post_edit(id):
+    post = Post.query.get_or_404(id)
     form = PostCreateForm()
     if form.validate_on_submit():
-        post = Post(body=form.body.data,
-                    author=current_user._get_current_object())
-        db.session.add(post)
-        db.session.commit()
-        flash('A new post has been created.')
+        if post.body != form.body.data:
+            post.body = form.body.data
+            db.session.add(post)
+            db.session.commit()
+            flash('The post has been edited.')
         return redirect(url_for('.post', id=post.id))
-    return render_template('post_create.html', form=form)
+    form.body.data = post.body
+    return render_template('post_edit.html', form=form)
 
 @main.route('/post/<id>', methods=['GET', 'POST'])
 def post(id):
@@ -101,38 +103,51 @@ def post(id):
         db.session.add(comment)
         db.session.commit()
         flash('You have created a new comment.')
-        return redirect(url_for('.post', id=id))
-    return render_template('post.html', post=post, form=form)
+        return redirect(url_for('.post', id=id)+'#comments')
+    page = request.args.get('page', 1, type=int)
+    pagination = post.comments.order_by(Comment.created_at.desc()).paginate(page, per_page=current_app.config.get('FLABY_COMMENTS_PER_PAGE', 5), error_out=False)
+    comments = pagination.items
+    return render_template('post.html', post=post, form=form, comments=comments, pagination=pagination)
         
 @main.route('/comments-moderate')
 @login_required
-@permission_required(Permission.COMMENTS_MODERATE)
+@permission_required(Permission.MODERATE_COMMENTS)
 def comments_moderate():
     page = request.args.get('page', 1, type=int)
-    pagination = Comments.query.filter_by(Comment.created_at.desc()).paginate(page, per_page=current_app.config.get('FLABY_COMMENTS_PER_PAGE', 15), error_out=False)
+    pagination = Comment.query.order_by(Comment.created_at.desc()).paginate(page, per_page=current_app.config.get('FLABY_COMMENTS_PER_PAGE', 15), error_out=False)
     comments = pagination.items
     return render_template('comments_moderate.html', comments=comments, pagination=pagination)
 
-@main.route('/comment_disabled/<id>')
+@main.route('/comment-disabled/<id>')
 @login_required
-@permission_required(Permission.COMMENTS_MODERATE)
-def comment_disabled():
+@permission_required(Permission.MODERATE_COMMENTS)
+def comment_disabled(id):
     comment = Comment.query.get_or_404(id)
     page = request.args.get('page', 1, type=int)
     comment.disabled = True
     db.session.add(comment)
     db.session.commit()
     flash('The comment has been disabled.')
-    return redirect(url_for('.comments_moderate', page=page)
+    return redirect(url_for('.comments_moderate', page=page))
 
-@main.route('/comment_enabled/<id>')
+@main.route('/comment-enabled/<id>')
 @login_required
-@permission_required(Permission.COMMENTS_MODERATE)
-def comment_enabled():
+@permission_required(Permission.MODERATE_COMMENTS)
+def comment_enabled(id):
     comment = Comment.query.get_or_404(id)
     page = request.args.get('page', 1, type=int)
     comment.disabled = False
     db.session.add(comment)
     db.session.commit()
     flash('The comment has been enabled.')
-    return redirect(url_for('.comments_moderate', page=page)    
+    return redirect(url_for('.comments_moderate', page=page)) 
+
+@main.route('/comment-delete/<id>')
+@login_required
+@permission_required(Permission.COMMENTS)
+def comment_delete(id):
+    comment = Comment.query.get_or_404(id)
+    db.session.delete(comment)
+    db.session.commit()
+    flash('Comment has been deleted.')
+    return redirct(request.args.get('origin') or url_for('.index'))
