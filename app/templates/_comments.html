@@ -30,14 +30,16 @@
 			{% if current_user.can(Permission.COMMENTS_MODERATE) %}
 				<br>
 				{% if comment.disabled %}
-				<a href="{{ url_for('main.comment_enabled', id=comment.id) }}">
+				<a href="{{ url_for('main.comment_enabled', id=comment.id, page=pagination.page) }}">
 					<span class="label label-primary">Enable</span>
 				</a>
 				{% else %}
-				<a href="{{ url_for('main.comment_disabled', id=comment.id) }}">
+				<a href="{{ url_for('main.comment_disabled', id=comment.id, page=pagination.page) }}">
 					<span class="label label-danger">Disable</span>
 				</a>
 				{% endif %}
+			{% elif current_user == comment.author and not comment.disabled %}
+			<a href="{{ url_for('main.comment_delete', id=comment.id) }}">Delete</a>
 			{% endif %}
 		</div>
 	</li>

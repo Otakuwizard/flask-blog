@@ -1,9 +1,5 @@
 {% extends "__base__.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
-{% block scripts %}
-{{ super() }}
-{{ pagedown.include_pagedown() }}
-{% endblock %}
 {% block title %}{{ super() }} - Post{% endblock %}
 {% block page_content %}
 <div class="col-md-8">
@@ -18,9 +14,20 @@
 		<p>created at {{ moment(post.created_at).fromNow() }}</p>
 	</div>
 	<br>
+	<div id="comments">
+		{% include "_comments.html" %}
+		{% if pagination %}
+			{{ macros.pagination_widget(pagination, '.post', fragment='#comments', id=post.id) }}
+		{% endif %}
+	</div>
 	<div {% if not current_user.is_authenticated %}class="disabled" {% endif %}>
 		<p>Add Comment</p>
 		{{ wtf.quick_form(form) }}
 	</div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+{{ pagedown.include_pagedown() }}
 {% endblock %}
