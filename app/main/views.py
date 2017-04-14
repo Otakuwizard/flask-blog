@@ -150,4 +150,4 @@ def comment_delete(id):
     db.session.delete(comment)
     db.session.commit()
     flash('Comment has been deleted.')
-    return redirct(request.args.get('origin') or url_for('.index'))
+    return redirect(request.args.get('local') or url_for('.index'))

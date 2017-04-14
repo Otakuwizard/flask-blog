@@ -1,9 +1,9 @@
 <ul class="comments">
 	{% for comment in comments %}
 	<li class="comment">
-		<div class="post-thumbnail">
+		<div class="comment-thumbnail">
 			<a href="{{ url_for('main.profile', username=comment.author.user_name) }}">
-				<img class="img-rounded" src="{{ url_for('comment.author.gravatar(size=40) }}">
+				<img class="img-rounded profile-thumbnail" src="{{ comment.author.gravatar(size=40) }}">
 			</a>
 		</div>
 		<div class="comment-content">
@@ -19,7 +19,7 @@
 				{% if comment.disabled %}
 				<p><i>This comment has been disabled by a moderator.</i></p>
 				{% endif %}
-				{% if current_user.can(Permission.COMMENTS_MODERATE) or not comment.disabled %}
+				{% if current_user.can(Permission.MODERATE_COMMENTS) or not comment.disabled %}
 					{% if comment.body_html %}
 						{{ comment.body_html | safe }}
 					{% else %}
@@ -27,7 +27,7 @@
 					{% endif %}
 				{% endif %}
 			</div>
-			{% if current_user.can(Permission.COMMENTS_MODERATE) %}
+			{% if current_user.can(Permission.MODERATE_COMMENTS) %}
 				<br>
 				{% if comment.disabled %}
 				<a href="{{ url_for('main.comment_enabled', id=comment.id, page=pagination.page) }}">
@@ -38,8 +38,9 @@
 					<span class="label label-danger">Disable</span>
 				</a>
 				{% endif %}
-			{% elif current_user == comment.author and not comment.disabled %}
-			<a href="{{ url_for('main.comment_delete', id=comment.id) }}">Delete</a>
+			{% endif %}
+			{% if current_user == comment.author and not comment.disabled %}
+			<a href="{{ url_for('main.comment_delete', id=comment.id, local=local) }}">Delete</a>
 			{% endif %}
 		</div>
 	</li>

@@ -1,5 +1,6 @@
 {% extends "__base__.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
+{% import "_macros.html" as macros %}
 {% block title %}{{ super() }} - Post{% endblock %}
 {% block page_content %}
 <div class="col-md-8">
@@ -8,16 +9,17 @@
 		<P><a href="{{ url_for('main.profile', username=post.author.user_name) }}">{{ post.author.user_name }}</a></p>
 	</div>
 	<div class="post-content">
-		<p>{% if post.body_html %}{{ post.body_html }}{% else %}{{ post.body }}{% endif %}</p>
+		<p>{% if post.body_html %}{{ post.body_html | safe }}{% else %}{{ post.body }}{% endif %}</p>
 	</div>
 	<div class="post-date">
 		<p>created at {{ moment(post.created_at).fromNow() }}</p>
 	</div>
 	<br>
 	<div id="comments">
+		{% set local = url_for('main.post', id=post.id)+'#comments' %}
 		{% include "_comments.html" %}
 		{% if pagination %}
-			{{ macros.pagination_widget(pagination, '.post', fragment='#comments', id=post.id) }}
+			{{ macros.pagination_widget(pagination, endpoint='.post', fragment='#comments', id=post.id) }}
 		{% endif %}
 	</div>
 	<div {% if not current_user.is_authenticated %}class="disabled" {% endif %}>

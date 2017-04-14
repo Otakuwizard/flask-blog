@@ -5,9 +5,10 @@
 <div class="page-header">
 	<h1>Moderate the Comments</h1>
 </div>
+{% set local = url_for('main.comments_moderate') %}
 {% include "_comments.html" %}
 {% if pagination %}
-	{{ macros.pagination_widget(pagination, 'main.comment_moderate') }}
+	{{ macros.pagination_widget(pagination, 'main.comments_moderate') }}
 {% endif %}
 {% endblock %}
 {% block scripts %}
