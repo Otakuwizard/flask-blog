@@ -23,6 +23,22 @@
 		Register At {{ moment(user.register_at).format('L') }}.<br>
 		Last Login {{ moment(user.last_login).fromNow() }}.
 	</p>
+	<p>
+		<a href="{{ url_for('main.followed', username=user.user_name) }}">Followed: </a><span class="badge">{{ user.followed.count()-1 }}</span><br>
+		<a href="{{ url_for('main.followers', username=user.user_name) }}">Followers: </a><span class="badge">{{ user.followers.count()-1 }}</span>
+	</p>
+	{% if current_user != user %}
+	<p>
+		{% if current_user.is_followed_by(user) %}
+		This user is following you.
+		{% endif %}
+		{% if current_user.is_following(user) %}
+		<a class="btn btn-danger" href="{{ url_for('main.unfollow', username=user.user_name) }}">Unfollow</a>
+		{% else %}
+		<a class="btn btn-primary" href="{{ url_for('main.follow', username=user.user_name) }}">Follow</a>
+		{% endif %}
+	</p>
+	{% endif %}
 	{% if user.is_administrator() %}
 	<p><a href="{{ url_for('main.profile_edit_admin', id=user.id) }}">Profile Edit[Admin]</a></p>
 	{% elif user == current_user %}

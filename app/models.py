@@ -24,6 +24,13 @@ class Permission:
     COMMENTS = 0x04
     MODERATE_COMMENTS = 0x08
     ADMINISTER = 0xff
+    
+class Follow(db.Model):
+    __tablename__ = 'follows'
+    id = db.Column(db.String(64), primary_key=True, default=generate_id)
+    followed_id = db.Column(db.String(64), db.ForeignKey('users.id'))
+    follower_id = db.Column(db.String(64), db.ForeignKey('users.id'))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
   
 class Role(db.Model):
     __tablename__ = 'roles'
@@ -256,13 +263,6 @@ class AnonymousUser(AnonymousUserMixin):
     
     def is_administrator(self):
         return False
-        
-class Follow(db.Model):
-    __tablename__ = 'follows'
-    id = db.Column(db.String(64), primary_key=True, default=generarte_id)
-    followed_id = db.Column(db.String(64), db.ForeignKey('users.id'))
-    follower_id = db.Column(db.String(64), db.ForeignKey('users.id'))
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     
 login_manager.anonymous_user = AnonymousUser

@@ -1,6 +1,6 @@
 from flask import render_template, redirect, url_for, request, current_app, flash, make_response
 from flask_login import current_user, login_required
-from ..models import User, Post, Comment, Permission
+from ..models import User, Post, Comment, Permission, Follow
 from . import main
 from ..decrator import permission_required, admin_required
 from .forms import ProfileEditForm, ProfileEditAdminForm, PostCreateForm, CommentCreateForm
@@ -27,11 +27,11 @@ def index():
         query = Post.query
     pagination = query.order_by(Post.created_at.desc()).paginate(page, per_page=current_app.config.get('FLABY_POSTS_PER_PAGE', 10), error_out=False)
     posts = pagination.items
-    return render_template('index.html', posts=posts, pagination=pagination, form=form)
+    return render_template('index.html', posts=posts, pagination=pagination, form=form, show_followed=show_followed)
     
-@mian.route('/all')
+@main.route('/all')
 @login_required
-def show_all()
+def show_all():
     resp = make_response(redirect(url_for('main.index')))
     resp.set_cookie('show_followed', '', max_age=30*24*60*60)
     return resp
@@ -42,6 +42,42 @@ def show_followed():
     resp = make_response(redirect(url_for('main.index')))
     resp.set_cookie('show_followed', '1', max_age=30*24*60*60)
     return resp
+    
+@main.route('/follow/<username>')
+@login_required
+@permission_required(Permission.FOLLOW)
+def follow(username):
+    user = User.query.filter_by(user_name=username).first_or_404()
+    if not current_user.is_following(user):
+        current_user.follow(user)
+    flash('You are following %s.' % username)
+    return redirect(url_for('.profile', username=username))
+    
+@main.route('/unfollow/<username>')
+@login_required
+@permission_required(Permission.FOLLOW)
+def unfollow(username):
+    user = User.query.filter_by(user_name=username).first_or_404()
+    if current_user.is_following(user):
+        current_user.unfollow(user)
+    flash('You are not following %s now.' % username)
+    return redirect(url_for('.profile', username=username))
+    
+@main.route('/followed/<username>')
+def followed(username):
+    user = User.query.filter_by(user_name=username).first_or_404()
+    page = request.args.get('page', 1, type=int)
+    pagination = user.followed.order_by(Follow.created_at.desc()).paginate(page, per_page=current_app.config.get('FLABY_FOLLOWED_PER_PAGE', 10), error_out=False)
+    follows = [{'user': item.followed, 'created_at'. item.created_at} for item in pagination.items]
+    return render_template('follows.html', pagination=pagination, follows=follows, user=user, title='Followed by %s' % username, endpoint='main.followed')
+
+@main.route('/followers/<username>')
+def followers(username):
+    user = User.query.filter_by(user_name=username).first_or_404()
+    page = request.args.get('page', '1', type=int)
+    pagination = user.followers.order_by(Follow.created_at.desc()).paginate(page, per_page=current_app.config.get('FLABY_FOLLOWERS_PER_PAGE', 10), error_out=False)
+    follows = [{'user': item.follower, 'created_at': item.created_at} for item in pagination.items]
+    return render_template('follows.html', pagination=pagination, follows=follows, user=user, title='Followers of %s' % username, endpoint='main.followers')
     
 @main.route('/profile/<username>')
 def profile(username):
