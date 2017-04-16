@@ -30,11 +30,11 @@
 			{% if current_user.can(Permission.MODERATE_COMMENTS) %}
 				<br>
 				{% if comment.disabled %}
-				<a href="{{ url_for('main.comment_enabled', id=comment.id, page=pagination.page) }}">
+				<a href="{{ url_for('main.comment_enabled', id=comment.id, page=pagination.page, local=local) }}">
 					<span class="label label-primary">Enable</span>
 				</a>
 				{% else %}
-				<a href="{{ url_for('main.comment_disabled', id=comment.id, page=pagination.page) }}">
+				<a href="{{ url_for('main.comment_disabled', id=comment.id, page=pagination.page, local=local) }}">
 					<span class="label label-danger">Disable</span>
 				</a>
 				{% endif %}

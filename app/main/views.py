@@ -68,13 +68,13 @@ def followed(username):
     user = User.query.filter_by(user_name=username).first_or_404()
     page = request.args.get('page', 1, type=int)
     pagination = user.followed.order_by(Follow.created_at.desc()).paginate(page, per_page=current_app.config.get('FLABY_FOLLOWED_PER_PAGE', 10), error_out=False)
-    follows = [{'user': item.followed, 'created_at'. item.created_at} for item in pagination.items]
+    follows = [{'user': item.followed, 'created_at': item.created_at} for item in pagination.items]
     return render_template('follows.html', pagination=pagination, follows=follows, user=user, title='Followed by %s' % username, endpoint='main.followed')
 
 @main.route('/followers/<username>')
 def followers(username):
     user = User.query.filter_by(user_name=username).first_or_404()
-    page = request.args.get('page', '1', type=int)
+    page = request.args.get('page', 1, type=int)
     pagination = user.followers.order_by(Follow.created_at.desc()).paginate(page, per_page=current_app.config.get('FLABY_FOLLOWERS_PER_PAGE', 10), error_out=False)
     follows = [{'user': item.follower, 'created_at': item.created_at} for item in pagination.items]
     return render_template('follows.html', pagination=pagination, follows=follows, user=user, title='Followers of %s' % username, endpoint='main.followers')
@@ -185,7 +185,7 @@ def comment_disabled(id):
     db.session.add(comment)
     db.session.commit()
     flash('The comment has been disabled.')
-    return redirect(url_for('.comments_moderate', page=page))
+    return redirect(request.args.get('local') or url_for('.comments_moderate', page=page))
 
 @main.route('/comment-enabled/<id>')
 @login_required
@@ -197,7 +197,7 @@ def comment_enabled(id):
     db.session.add(comment)
     db.session.commit()
     flash('The comment has been enabled.')
-    return redirect(url_for('.comments_moderate', page=page)) 
+    return redirect(request.args.get('local') or url_for('.comments_moderate', page=page)) 
 
 @main.route('/comment-delete/<id>')
 @login_required
