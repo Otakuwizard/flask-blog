@@ -147,7 +147,7 @@ def post_edit(id):
             flash('The post has been edited.')
         return redirect(url_for('.post', id=post.id))
     form.body.data = post.body
-    return render_template('post_edit.html', form=form)
+    return render_template('post_edit.html', form=form, post=post)
 
 @main.route('/post/<id>', methods=['GET', 'POST'])
 def post(id):
@@ -165,7 +165,39 @@ def post(id):
     pagination = post.comments.order_by(Comment.created_at.desc()).paginate(page, per_page=current_app.config.get('FLABY_COMMENTS_PER_PAGE', 5), error_out=False)
     comments = pagination.items
     return render_template('post.html', post=post, form=form, comments=comments, pagination=pagination)
-        
+
+@main.route('/post-delete/<id>')
+@login_required
+@permission_required(Permission.WRITE_ARTICLES)
+def post_delete(id):
+    post = Post.query.get_or_404(id)
+    db.session.delete(post)
+    db.session.commit()
+    flash('Post has been deleted.')
+    return redirect(url_for('.index'))
+    
+@main.route('/post-enable/<id>')
+@login_required
+@admin_required
+def post_enable(id):
+    post = Post.query.get_or_404(id)
+    post.disabled = False
+    db.session.add(post)
+    db.session.commit()
+    flash('Post has been enabled.')
+    return redirect(url_for('.index'))
+    
+@main.route('/post-disable/<id>')
+@login_required
+@admin_required
+def post_disable(id):
+    post = Post.query.get_or_404(id)
+    post.disabled = True
+    db.session.add(post)
+    db.session.commit()
+    flash('Post has been disabled.')
+    return redirect(url_for('.index'))
+    
 @main.route('/comments-moderate')
 @login_required
 @permission_required(Permission.MODERATE_COMMENTS)

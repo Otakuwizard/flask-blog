@@ -11,4 +11,18 @@
 {% block scripts %}
 {{ super() }}
 {{ pagedown.include_pagedown() }}
+<div class="col-md-11">
+	<div class="post-footer">
+		<p>
+			<a class="btn btn-danger" href="{{ url_for('main.post_delete', id=post.id)}}">Delete</a>
+		{% if current_user.is_administrator() %}
+			{% if post.disabled %}
+			<a class="btn btn-primary" href="{{ url_for('main.post_enable', id=post.id) }}">Enable</a>
+			{% else %}
+			<a class="btn btn-danger" href="{{ url_for('main.post_disable', id=post.id) }}">Disable</a>
+			{% endif %}
+		{% endif %}
+		</p>
+	</div>
+</div>
 {% endblock %}
