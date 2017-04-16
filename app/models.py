@@ -197,6 +197,7 @@ class Post(db.Model):
     id = db.Column(db.String(64), primary_key=True, default=generate_id)
     body = db.Column(db.Text())
     body_html = db.Column(db.Text())
+    disabled = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime(), index=True, default=datetime.utcnow)
     author_id = db.Column(db.String(64), db.ForeignKey('users.id'))
     comments = db.relationship('Comment', backref='post', lazy='dynamic')
