@@ -10,6 +10,7 @@ from markdown import markdown
 import bleach
 import hashlib
 from . import login_manager
+from app.exceptions import ValidationError
 
 def generate_id():
     return '%015d%s000' % (int(time.time()*1000), uuid.uuid4().hex)
@@ -191,6 +192,49 @@ class User(UserMixin, db.Model):
                 user.follow(user)
                 db.session.add(user)
                 db.session.commit()
+                
+    def __repr__(self):
+        return '<user %r>' % self.user_name
+        
+    def generate_auth_token(self, expiration=3600):
+        s = Serializer(current_app.config['SECRET_KEY'], exporation)
+        return s.dumps({'id': self.id})
+        
+    @staticmethod
+    def verify_auth_token(token):
+        s = Serializer(current_user.config['SECRET_KEY'])
+        try:
+            data = s.loads(token)
+        except:
+            return None
+        return User.query.get(data['id'])
+                
+    def to_json(self):
+        json_post = {
+            'url': url_for('api.get_user', id=self.id, _external=True),
+            'username': self.user_name,
+            'register_at': self.register_at,
+            'last_login': self.last_login,
+            'posts': url_for('api.get_user_posts', id=self.id, _external=True),
+            'followed_posts': url_for('api.get_user_followed_posts', id=self.id, _external=True),
+            'posts_count': self.posts.count()
+        }
+        
+        return json_post
+        
+    @staticmethod
+    def from_json(json_post):
+        if json_post.get('email') is None\
+                or json_post.get('password') is None\
+                or json_post.get('username') is None:
+            raise ValidationError('Invalid Register Information')
+        user = User(id=generate_id(),
+                    email=json_post.get('email'),
+                    user_name=json_post.get('username'),
+                    password=json_post.get('password'),
+                    location=json_post.get('location'),
+                    name=json_post.get('name'))
+        return user
     
 class Post(db.Model):
     __tablename__ = 'posts'
@@ -222,6 +266,27 @@ class Post(db.Model):
                         created_at=forgery_py.date.date(True))
             db.session.add(post)
             db.session.commit()
+            
+    def to_json(self):
+        json_post = {
+            'url': url_for('api.get_post', id=self.id, _external=True),
+            'body': self.body,
+            'body_html': self.body_html,
+            'created_at': self.created_at,
+            'author': url_for('api.get_user', id=self.author_id, _external=True),
+            'comments': url_for('api.get_post_comments', id=self.id, _external=True),
+            'comments_count': post.comments.count()
+        }
+        
+        return json_post
+        
+    @staticmethod
+    def from_json(json_post).
+        body = json_post.get('body')
+        if body is None or body == '':
+            raise ValidationError('post does not have a body')
+        return Post(body=body)
+        
     
 class Comment(db.Model):
     __tablename__ = 'comments'
@@ -257,22 +322,25 @@ class Comment(db.Model):
             db.session.add(comment)
             db.session.commit()
             
-    def __repr__(self):
-        return '<user %r>' % self.user_name
+    def to_json(self):
+        json_post = {
+            'url': url_for('api.get_comment', id=self.id, _external=True),
+            'body': self.body,
+            'body_html': self.body_html,
+            'created_at': self.created_at,
+            'author': url_for('api.get_user', id=self.author_id, _external=True),
+            'post': url_for('api.get_post', id=self.post_id, _external=True)
+        }
         
-    def generate_auth_token(self, expiration=3600):
-        s = Serializer(current_app.config['SECRET_KEY'], exporation)
-        return s.dumps({'id': self.id})
+        return json_post
         
     @staticmethod
-    def verify_auth_token(token):
-        s = Serializer(current_user.config['SECRET_KEY'])
-        try:
-            data = s.loads(token)
-        except:
-            return None
-        return User.query.get(data['id'])
-
+    def from_json(json_post):
+        body = json_post.get('body')
+        if body is None or body == '':
+            raise ValidationError('comment does not have a body')
+        return Comment(body=body)
+    
 class AnonymousUser(AnonymousUserMixin):
     def can(self, permission):
         return False
