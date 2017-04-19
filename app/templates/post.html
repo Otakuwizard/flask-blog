@@ -22,9 +22,11 @@
 			{{ macros.pagination_widget(pagination, endpoint='.post', fragment='#comments', id=post.id) }}
 		{% endif %}
 	</div>
-	<div {% if not current_user.is_authenticated %}class="disabled" {% endif %}>
+	<div>
+		{% if current_user.can(Permission.COMMENTS) %}
 		<p>Add Comment</p>
 		{{ wtf.quick_form(form) }}
+		{% endif %}
 	</div>
 </div>
 {% endblock %}

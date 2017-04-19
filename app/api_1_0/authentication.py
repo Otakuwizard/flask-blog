@@ -22,7 +22,7 @@ def verify_password(email_or_token, password):
     g.token_used = False
     return g.current_user.verify_password(password)
     
-@auth.errorhandler
+@auth.error_handler
 def auth_error():
     return unauthorized('Invalid Credential')
     

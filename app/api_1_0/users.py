@@ -2,7 +2,7 @@ from flask import request, url_for, jsonify, g, current_app
 from . import api
 from ..models import User, Post, Comment, Follow
 from .. import db
-from .exceptions import ValidationError
+from app.exceptions import ValidationError
 
 @api.route('/users/<id>')
 def get_user(id):

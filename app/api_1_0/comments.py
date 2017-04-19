@@ -10,8 +10,8 @@ def get_comment(id):
     comment = Comment,query.get_or_404(id)
     return jsonify(comment.to_json())
     
-@api.route('/comments/<id>', methods=['POST'])
-@permission_required(Permission.COMMENT)
+@api.route('/posts/<id>/comments', methods=['POST'])
+@permission_required(Permission.COMMENTS)
 def new_comment(id):
     post = Post.query.get_or_404(id)
     comment = Comment.from_json(request.json)
