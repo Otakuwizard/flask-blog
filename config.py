@@ -7,6 +7,7 @@ class Config:
     FLABY_MAIL_SUBJECT_PREFIX = 'FLABY'
     FLABY_MAIL_SENDER = 'FLABY Admin <fzj890909@gmail.com>'
     FLABY_ADMIN = os.environ.get('FLABY_ADMIN')
+    SSL_DISABLE = True
     
     @staticmethod
     def init_app(app):
@@ -53,10 +54,14 @@ class ProductionConfig(Config):
         app.logger.addHandler(mail_handler)
         
 class HerokuProductionConfig(ProductionConfig):
+    SSL_DISABLE = bool(os.environ.get('SSL_DISABLE'))
     
     @classmethod
     def init_app(cls, app):
         ProductionConfig.init_app(app)
+        
+        from werkzeug.contrib.fixers import ProxyFix
+        app.wsgi_app = ProxyFIx(app.wsgi_app)
         
         import logging
         from logging.handlers import StreamHandler
