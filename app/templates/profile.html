@@ -27,7 +27,7 @@
 		<a href="{{ url_for('main.followed', username=user.user_name) }}">Followed: </a><span class="badge">{{ user.followed.count()-1 }}</span><br>
 		<a href="{{ url_for('main.followers', username=user.user_name) }}">Followers: </a><span class="badge">{{ user.followers.count()-1 }}</span>
 	</p>
-	{% if current_user != user %}
+	{% if current_user.is_authenticated and current_user != user %}
 	<p>
 		{% if current_user.is_followed_by(user) %}
 		This user is following you.
@@ -39,14 +39,14 @@
 		{% endif %}
 	</p>
 	{% endif %}
-	{% if user.is_administrator() %}
+	{% if current_user.is_administrator() %}
 	<p><a href="{{ url_for('main.profile_edit_admin', id=user.id) }}">Profile Edit[Admin]</a></p>
 	{% elif user == current_user %}
 	<p><a href="{{ url_for('main.profile_edit') }}">Profile Edit</a></p>
 	{% endif %}
 <div>
 <div>
-	<p>Posts created by the user:</p>
+	<p>Posts created by {{ user.user_name }}:</p>
 	{% include "_posts.html" %}
 	{% if pagination %}
 		{{ macros.pagination_widget(pagination, 'main.profile', username=user.user_name) }}
