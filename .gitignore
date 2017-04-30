@@ -93,6 +93,5 @@ ENV/
 # Rope project settings
 .ropeproject
 
-
 # test document
 tmp/
