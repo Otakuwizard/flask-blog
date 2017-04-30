@@ -8,6 +8,11 @@ class Config:
     FLABY_MAIL_SENDER = 'FLABY Admin <fzj890909@gmail.com>'
     FLABY_ADMIN = os.environ.get('FLABY_ADMIN')
     SSL_DISABLE = True
+    MAIL_SERVER = 'smtp.gmail.com'
+    MAIL_PORT = 587
+    MAIL_USE_TLS = True
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     
     @staticmethod
     def init_app(app):
@@ -15,11 +20,6 @@ class Config:
         
 class DevelopmentConfig(Config):
     DEBUG = True
-    MAIL_SERVER = 'smtp.gmail.com'
-    MAIL_PORT = 587
-    MAIL_USE_TLS = True
-    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
-    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE_URI')
     
 class TestingConfig(Config):
