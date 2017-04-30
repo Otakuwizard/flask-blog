@@ -61,7 +61,7 @@ class HerokuProductionConfig(ProductionConfig):
         ProductionConfig.init_app(app)
         
         from werkzeug.contrib.fixers import ProxyFix
-        app.wsgi_app = ProxyFIx(app.wsgi_app)
+        app.wsgi_app = ProxyFix(app.wsgi_app)
         
         import logging
         from logging.handlers import StreamHandler
