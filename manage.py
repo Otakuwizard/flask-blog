@@ -41,7 +41,7 @@ def test(coverage=False):
 @manager.command
 def deploy():
     '''Run deployment tasks'''
-    from flask.migrate import upgrade
+    from flask_migrate import upgrade
     from app.models import Role, User
     
     upgrade()
