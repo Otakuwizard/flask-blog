@@ -93,8 +93,5 @@ ENV/
 # Rope project settings
 .ropeproject
 
-# Document of migration
-migrations/
-
 # test document
 tmp/
