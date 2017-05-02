@@ -6,11 +6,6 @@
 	<h1>Edit Post</h1>
 </div>
 {{ wtf.quick_form(form) }}
-{% endblock %}
-
-{% block scripts %}
-{{ super() }}
-{{ pagedown.include_pagedown() }}
 <div class="col-md-11">
 	<div class="post-footer">
 		<p>
@@ -25,4 +20,9 @@
 		</p>
 	</div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+{{ pagedown.include_pagedown() }}
 {% endblock %}
