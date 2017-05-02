@@ -9,7 +9,7 @@
 	<p>
 		{% if user.name %}{{ user.name }}<br>{% endif %}
 		{% if user.location %}
-		From <a href="http://maps.google.com/?q={{ user.location }}">{{ user.location }}</a>
+		From <a href="http://maps.google.com/?q={{ user.location }}"><span class="glyphicon glyphicon-map-marker"></span> {{ user.location }}</a>
 		{% endif %}
 	</p>
 	{% endif %}
@@ -24,8 +24,8 @@
 		Last Login {{ moment(user.last_login).fromNow() }}.
 	</p>
 	<p>
-		<a href="{{ url_for('main.followed', username=user.user_name) }}">Followed: </a><span class="badge">{{ user.followed.count()-1 }}</span><br>
-		<a href="{{ url_for('main.followers', username=user.user_name) }}">Followers: </a><span class="badge">{{ user.followers.count()-1 }}</span>
+		<a href="{{ url_for('main.followed', username=user.user_name) }}"><span class="glyphicon glyphicon-list"></span> Followed: </a><span class="badge">{{ user.followed.count()-1 }}</span><br>
+		<a href="{{ url_for('main.followers', username=user.user_name) }}"><span class="glyphicon glyphicon-list"></span> Followers: </a><span class="badge">{{ user.followers.count()-1 }}</span>
 	</p>
 	{% if current_user.is_authenticated and current_user != user %}
 	<p>
@@ -33,16 +33,16 @@
 		This user is following you.
 		{% endif %}
 		{% if current_user.is_following(user) %}
-		<a class="btn btn-danger" href="{{ url_for('main.unfollow', username=user.user_name) }}">Unfollow</a>
+		<a class="btn btn-danger" href="{{ url_for('main.unfollow', username=user.user_name) }}"><span class="glyphicon glyphicon-remove"></span> Unfollow</a>
 		{% else %}
-		<a class="btn btn-primary" href="{{ url_for('main.follow', username=user.user_name) }}">Follow</a>
+		<a class="btn btn-primary" href="{{ url_for('main.follow', username=user.user_name) }}"><span class="glyphicon glyphicon-ok"></span> Follow</a>
 		{% endif %}
 	</p>
 	{% endif %}
 	{% if current_user.is_administrator() %}
-	<p><a href="{{ url_for('main.profile_edit_admin', id=user.id) }}">Profile Edit[Admin]</a></p>
+	<p><a href="{{ url_for('main.profile_edit_admin', id=user.id) }}"><span class="glyphicon glyphicon-edit"></span> Profile Edit[Admin]</a></p>
 	{% elif user == current_user %}
-	<p><a href="{{ url_for('main.profile_edit') }}">Profile Edit</a></p>
+	<p><a href="{{ url_for('main.profile_edit') }}"><span class="glyphicon glyphicon-edit"></span> Profile Edit</a></p>
 	{% endif %}
 <div>
 <div>

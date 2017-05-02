@@ -5,12 +5,13 @@
 <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" class="image/icon">
 <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" class="image/x-icon">
 <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='myownnav.css') }}">
 {% endblock %}
 {% block navbar %}
-<div class="navbar navbar-inverse" role="navigation">
+<div class="navbar navbar-default navbar-static-top" style="background-color:#339966;" role="navigation">
 	<div class="container">
 		<div class="navbar-header">
-			<button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".navbar-collapse">
+			<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#collapse">
 				<span class="sr-only">Toggle Navigation</span>
 				<span class="icon-bar"></span>
 				<span class="icon-bar"></span>
@@ -18,23 +19,27 @@
 			</button>
 			<a class="navbar-brand" href="{{ url_for('main.index') }}">Flaby</a>
 		</div>
-		<div class="navbar-collapse collapse">
+		<div class="collapse navbar-collapse" id="collapse">
 			<ul class="nav navbar-nav">
-				<li><a href="{{ url_for('main.index') }}">Home</a></li>
-				{% if current_user.is_authenticated %}
-				<li><a href="{{ url_for('main.profile', username=current_user.user_name) }}">Profile</a></li>
-					{% if current_user.can(Permission.MODERATE_COMMENTS) %}
-					<li><a href="{{ url_for('main.comments_moderate') }}">Comments Moderate</a></li>
-					{% endif %}
-				{% endif %}
+				<li><a href="{{ url_for('main.index') }}"><span class="glyphicon glyphicon-home"></span> Home</a></li>
 			</ul>
 			<ul class="nav navbar-nav navbar-right">
 				{%if current_user.is_authenticated %}
-				<li><a href="{{ url_for('auth.email_change') }}">Email Change</a></li>
-				<li><a href="{{ url_for('auth.password_change') }}">Password Change</a><li>
-				<li><a href="{{ url_for('auth.logout') }}">Log Out</a></li>
+				<li class="dropdown">
+					<a href="#" class="dropdown-toggle" data-toggle="dropdown">Menu <b class="caret"></b></a>
+					<ul class="dropdown-menu" role="menu" aria_labelledby="dropdownMenu1">
+						<li><a href="{{ url_for('main.profile', username=current_user.user_name) }}"><span class="glyphicon glyphicon-user"></span> Profile</a></li>
+						<li><a href="{{ url_for('auth.email_change') }}"><span class="glyphicon glyphicon-wrench"></span> Email Change</a></li>
+						<li><a href="{{ url_for('auth.password_change') }}"><span class="glyphicon glyphicon-wrench"></span> Password Change</a><li>
+						{% if current_user.can(Permission.MODERATE_COMMENTS) %}
+						<li class="divider"></li>
+						<li><a href="{{ url_for('main.comments_moderate') }}"><span class="glyphicon glyphicon-eye-open"> Comments Moderate</a></li>
+						{% endif %}
+					</ul>
+				</li>
+				<li><a href="{{ url_for('auth.logout') }}"><span class="glyphicon glyphicon-log-out"></span> Log Out</a></li>
 				{% else %}
-				<li><a href="{{ url_for('auth.login') }}">Log In</a></li>
+				<li><a href="{{ url_for('auth.login') }}"><span class="glyphicon glyphicon-log-in"></span> Log In</a></li>
 				{% endif %}
 			</ul>
 		</div>
@@ -43,6 +48,12 @@
 {% endblock %}
 
 {% block content %}
+<div id="important" style="color:#FFFFFF; background-color:#339966; padding:30px 0; margin:-20px 0 20px 0;">
+	<div class="container">
+		<h1 style="color:#fff; font-size:60px">劲爆大象部落</h1>
+		<p style="font-size:24px; line-height:48px">当然是选择原谅她啦</p>
+	</div>
+</div>
 <div class="container">
 	{% for message in get_flashed_messages() %}
 	<div class="alert alert-warning">
@@ -52,6 +63,18 @@
 	{% endfor %}
 	{% block page_content %}{% endblock %}
 </div>
+<br>
+<footer style="background-color:#ddd; padding: 20px 0;">
+	<div class="container">
+		<p>
+			<a target="_blank" href="https://github.com/Otakuwizard">GitHub</a> -
+			<a target_"_blank" href="http://www.weibo.com/u/2319626291?refer_flag=1001030101_&is_hot=1">Weibo</a>
+		</p>
+		<p>This Weobsite is made by <a target="_blank" href="http://www.weibo.com/u/2319626291">@Feng Zijun</a></p>
+		<p>Email <a href="mailto:fzj890909@gmail.com">fzj890909@gmail</a></p>
+		<p>Code Resource <a target="_blank" href="https://github.com/Otakuwizard/flask-blog"><span class="glyphicon glyphicon-book"></span></a></p>
+	</div>
+</footer>
 {% endblock %}
 	
 {% block scripts %}
