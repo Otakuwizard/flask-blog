@@ -5,10 +5,10 @@ class Config:
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     FLABY_MAIL_SUBJECT_PREFIX = 'FLABY'
-    FLABY_MAIL_SENDER = 'FLABY Admin <fzj890909@gmail.com>'
+    FLABY_MAIL_SENDER = 'FLABY Admin <flaby@gmx.de>'
     FLABY_ADMIN = os.environ.get('FLABY_ADMIN')
     SSL_DISABLE = True
-    MAIL_SERVER = 'smtp.gmail.com'
+    MAIL_SERVER = 'mail.gmx.net'
     MAIL_PORT = 587
     MAIL_USE_TLS = True
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
