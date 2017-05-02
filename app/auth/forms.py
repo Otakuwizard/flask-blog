@@ -17,7 +17,7 @@ class RegisterForm(FlaskForm):
     password1 = PasswordField('*Password', validators=[Required(), EqualTo('password2', message='Password must be matched.'),
                                 Regexp('^(?!^[0-9a-z]+$)(?!^[0-9A-Z]+$)(?!^[a-zA-Z]+$)[a-zA-Z0-9]{6,20}$', 0, 
                                 'Password must have a combination from letters and numbers and the langth must be 6 to 20.')])
-    password2 = PasswordField('*Reenter your password', validators=[Required()])
+    password2 = PasswordField('*Retype your password', validators=[Required()])
     name = StringField('Real name')
     location = StringField('From')
     submit = SubmitField('Register')
