@@ -77,6 +77,7 @@ class User(UserMixin, db.Model):
     avatar_hash = db.Column(db.String(32))
     followed = db.relationship('Follow', foreign_keys=[Follow.follower_id], backref=db.backref('follower', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')
     followers = db.relationship('Follow', foreign_keys=[Follow.followed_id], backref=db.backref('followed', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')
+    blogs = db.relationship('Blog', backref='author', lazy='dynamic')
     
     def __init__(self, **kw):
         super(User, self).__init__(**kw)
@@ -297,6 +298,7 @@ class Comment(db.Model):
     created_at = db.Column(db.DateTime(), default=datetime.utcnow)
     auhtor_id = db.Column(db.String(64), db.ForeignKey('users.id'))
     post_id = db.Column(db.String(64), db.ForeignKey('posts.id'))
+    blog_id = db.Column(db.String(64), db.ForeignKey('blogs.id'))
     
     @staticmethod
     def on_changed_body(target, value, oldvalue, initiator):
@@ -347,8 +349,28 @@ class AnonymousUser(AnonymousUserMixin):
     
     def is_administrator(self):
         return False
+        
+class Blog(db.Model):
+    __tablename__ = 'blogs'
+    id = db.Column(db.String(64), primary_key=True, default=generate_id)
+    title = db.Column(db.String(32), nulltable=False)
+    summary = db.Column(db.String(256), nulltable=False)
+    body = db.Column(db.Text)
+    body_html = db.Column(db.Text)
+    author_id = db.Column(db.String(64), db.ForeignKey('users.id'))
+    created_at = db.Column(db.DateTime(), default=datetime.utcnow)
+    last_edit = db.Column(db.Datetime(), default=datetime.utcnow)
+    comments = db.relationship('Comment', backref='blog', lazy='dynamic')
     
-    
+    def time_update(self):
+        self.last_edit = datetime.utcnow()
+        
+    @staticmethod
+    def on_changed_body(target, value, oldvalue, initiator):
+        allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code', 'em', 'i', 'li', 'ol', 'pre', 'strong', 'ul', 'h1', 'h2', 'h3', 'p']
+        target.body_html = bleach.linkify(bleach.clean(markdown(value, output_format='html'), tags=allowed_tags, strip=True))
+        
 login_manager.anonymous_user = AnonymousUser
 db.event.listen(Post.body, 'set', Post.on_changed_body)
 db.event.listen(Comment.body, 'set', Comment.on_changed_body)
+db.event.listen(Blog.body, 'set', Blog.on_changed_body)

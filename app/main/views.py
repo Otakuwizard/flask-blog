@@ -1,13 +1,13 @@
 from flask import render_template, redirect, url_for, request, current_app, flash, make_response
 from flask_login import current_user, login_required
-from ..models import User, Post, Comment, Permission, Follow
+from ..models import User, Post, Comment, Permission, Follow, Blog
 from . import main
 from ..decrator import permission_required, admin_required
-from .forms import ProfileEditForm, ProfileEditAdminForm, PostCreateForm, CommentCreateForm
+from .forms import ProfileEditForm, ProfileEditAdminForm, PostCreateForm, CommentCreateForm, BlogCreateForm
 from .. import db
 
-@main.route('/', methods=['GET', 'POST'])
-def index():
+@main.route('/twitter', methods=['GET', 'POST'])
+def twitter():
     form = PostCreateForm()
     if form.validate_on_submit():
         post = Post(body=form.body.data,
@@ -16,7 +16,7 @@ def index():
         db.session.add(post)
         db.session.commit()
         flash('A new post has been created.')
-        return redirect(url_for('.index'))
+        return redirect(url_for('.twitter'))
     page = request.args.get('page', 1, type=int)
     show_followed = False
     if current_user.is_authenticated:
@@ -27,19 +27,19 @@ def index():
         query = Post.query
     pagination = query.order_by(Post.created_at.desc()).paginate(page, per_page=current_app.config.get('FLABY_POSTS_PER_PAGE', 10), error_out=False)
     posts = pagination.items
-    return render_template('index.html', posts=posts, pagination=pagination, form=form, show_followed=show_followed)
+    return render_template('twitter.html', posts=posts, pagination=pagination, form=form, show_followed=show_followed)
     
-@main.route('/all')
+@main.route('/twitter/all')
 @login_required
 def show_all():
-    resp = make_response(redirect(url_for('main.index')))
+    resp = make_response(redirect(url_for('main.twitter')))
     resp.set_cookie('show_followed', '', max_age=30*24*60*60)
     return resp
     
-@main.route('/followed')
+@main.route('/twitter/followed')
 @login_required
 def show_followed():
-    resp = make_response(redirect(url_for('main.index')))
+    resp = make_response(redirect(url_for('main.twitter')))
     resp.set_cookie('show_followed', '1', max_age=30*24*60*60)
     return resp
     
@@ -174,7 +174,7 @@ def post_delete(id):
     db.session.delete(post)
     db.session.commit()
     flash('Post has been deleted.')
-    return redirect(url_for('.index'))
+    return redirect(url_for('.twitter'))
     
 @main.route('/post-enable/<id>')
 @login_required
@@ -185,7 +185,7 @@ def post_enable(id):
     db.session.add(post)
     db.session.commit()
     flash('Post has been enabled.')
-    return redirect(url_for('.index'))
+    return redirect(url_for('.twitter'))
     
 @main.route('/post-disable/<id>')
 @login_required
@@ -196,7 +196,7 @@ def post_disable(id):
     db.session.add(post)
     db.session.commit()
     flash('Post has been disabled.')
-    return redirect(url_for('.index'))
+    return redirect(url_for('.twitter'))
     
 @main.route('/comments-moderate')
 @login_required
@@ -240,3 +240,62 @@ def comment_delete(id):
     db.session.commit()
     flash('Comment has been deleted.')
     return redirect(request.args.get('local') or url_for('.index'))
+    
+@main.route('/')
+def index():
+    page = request.args.get('page', 1, type=int)
+    pagination = Blog.query.order_by(Blog.created_at.desc()).paginate(page, per_page=current_app.config.get('FLABY_BLOG_PER_PAGE', 5), error_out=False)
+    blogs = pagination.items
+    return render_template('index.html', pagination=pagination, blogs=blogs)
+    
+@main.route('/blog-create', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def blog_create():
+    form = BlogCreateForm()
+    if form.validate_on_submit():
+        blog = Blog(title=form.title.data,
+                    summary=form.summary.data,
+                    body=form.body.data,
+                    author=current_user._get_current_object())
+        db.session.add(blog)
+        db.session.commit()
+        flash('A new blog has been wroted.')
+        return redirect(url_for('.blog', id=blog.id))
+    return render_template('blog_create.html', form=form)
+    
+@main.route('/blog-edit/<id>', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def blog_edit(id):
+    blog = Blog.query.get_or_404(id)
+    form = BlogCreateForm()
+    if form.validate_on_submit():
+        blog.title = form.title.data
+        blog.summary = form.summary.data
+        blog.body = form.body.data
+        blog.time_update()
+        db.session.add(blog)
+        db.session.commit()
+        flash('The blog bas been updated.')
+        return redirect(url_for('.blog', id=blog.id))
+    form.title.data = blog.title
+    form.summary.data = blog.summary
+    form.body.data = blog.body
+    return render_template('blog_edit.html', form=form)
+
+@main.route('/blog/<id>', methods=['GET', 'POST'])
+def blog(id):
+    blog = Blog.query.get_or_404(id)
+    form = CommentCreateForm()
+    if form.validate_on_submit():
+        comment = Comment(body=form.body.data,
+                            author=current_user._get_current_object(),
+                            blog=blog)
+        db.session.add(comment)
+        db.session.commit()
+        return redirect(url_for('.blog', id=id))
+    page = request.args.get('page', 1, type=int)
+    pagination = blog.comments.order_by(Comment.created_at.desc()).paginate(page, per_page=current_app.config.get('FLABY_BLOG_COMMENT_PER_PAGE', 10), error_out=False)
+    comments = pagination.items
+    return render_template('blog.html', blog=blog, pagination=pagination, comments=comments)
