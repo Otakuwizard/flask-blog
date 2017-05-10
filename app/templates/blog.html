@@ -1,0 +1,48 @@
+{% extends "__base__.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "_macros.html" as macros %}
+{% block title %}{{ super() }} - {{ blog.title }}{% endblock %}
+{% block page_content %}
+<div class="col-md-8">
+	<div class="page-header">
+		<h3>{{ blog.title }}</h3>
+	<div>
+	<p>{% if blog.body_html %}{{ blog.body_html | safe }}{% else %}{{ blog.body }}{% endblock %}</p>
+	<p>
+		<i class="text-left">Published at {{ moment(blog.created_at).fromNow() }}</i>
+		<i class="text-right">Last edited at {{ moment(blog.last_edit).format('L') }}</i> 
+	</p>
+	{% if current_user == blog.author %}
+	<p class="text-right">
+		<a href="{{ url_for('main.blog_edit', id=blog.id) }}" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-edit"></span> Edit</a> 
+		<a href="{{ url_for('main.blog_delete', id=blog.id) }}" class="btn btn-danger btn-sm"><span class="glyphicon glyphicon-remove"></span> Delete</a>
+	</p>
+	{% endif %}
+	<hr>
+	<div class="panel panel-success">
+		<div class="panel-heading">
+			<h3 class="panel-title">Comments</h3>
+		</div>
+		<div id="comments" class="panel-body">
+			{% include "_comments.html" %}
+			{{ macros.pagination_widget(pagination, 'main.blog', '#comments', id=blog.id)}}
+		</div>
+	</div>
+	<div class="panel panel-primary {% if not current_user.is_authenticated %}disabled{% endif %}">
+		<div class="panel-heading">
+			<h3 class="panel-title">Make Your Comment</h3>
+		</div>
+		<div class="panel-body">
+			{% if current_user.is_authenticated %}
+			{{ wtf.quick_form(form) }}
+			{% else %}
+			<p class="text-center">Please Sign In</p>
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+{{ pagedown.include_pagedown() }}
+{% endblock %}

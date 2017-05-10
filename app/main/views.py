@@ -282,7 +282,7 @@ def blog_edit(id):
     form.title.data = blog.title
     form.summary.data = blog.summary
     form.body.data = blog.body
-    return render_template('blog_edit.html', form=form)
+    return render_template('blog_create.html', form=form, blog=blog)
 
 @main.route('/blog/<id>', methods=['GET', 'POST'])
 def blog(id):
@@ -299,3 +299,16 @@ def blog(id):
     pagination = blog.comments.order_by(Comment.created_at.desc()).paginate(page, per_page=current_app.config.get('FLABY_BLOG_COMMENT_PER_PAGE', 10), error_out=False)
     comments = pagination.items
     return render_template('blog.html', blog=blog, pagination=pagination, comments=comments)
+    
+@main.route('/blog-delete/<id>')
+@login_required
+@admin_required
+def blog_delete(id):
+    blog = Blog.query.get_or_404(id)
+    comments = blog.comments.all()
+    for comment in comments:
+        db.session.delete(comment)
+    db.session.delete(blog)
+    db.session.commit()
+    flash('Blog has been deleted.')
+    return redirect(url_for('main.index'))
