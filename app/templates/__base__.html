@@ -22,6 +22,10 @@
 		<div class="collapse navbar-collapse" id="collapse">
 			<ul class="nav navbar-nav">
 				<li><a href="{{ url_for('main.index') }}"><span class="glyphicon glyphicon-home"></span> Home</a></li>
+				<li><a href="{{ url_for('main.twitter') }}"><span class="glyphicon glyphicon-globe"></span> Community</a></li>
+				{% if current_user.is_administrator() %}
+				<li><a href="{{ url_for('main.blog_create') }}"><span class="glyphicon glyphicon-pencil"></span> New Blog</a></li>
+				{% endif %}
 			</ul>
 			<ul class="nav navbar-nav navbar-right">
 				{%if current_user.is_authenticated %}
@@ -61,14 +65,32 @@
 		{{ message }}
 	</div>
 	{% endfor %}
-	{% block page_content %}{% endblock %}
+	<div class="row">
+		<div class="col-md-8">
+			{% block page_content %}{% endblock %}
+		</div>
+		<div class="col-md-4">
+			<div class="panel panel-info">
+				<div class="panel-heading">
+					<h3 class="panel-title">Links</h3>
+				</div>
+				<div class="panel-body">
+					<ul>
+						<li><a target="_blank" href="http://glyphicons.com/"><span class="glyphicon glyphicon-hand-right"></span> Glyphicons</a></li>
+						<li><a target="_blank" href="http://www.liaoxuefeng.com/wiki/0014316089557264a6b348958f449949df42a6d3a2e542c000"><span class="glyphicon glyphicon-hand-right"></span> Python3 Tutorial</a></li>
+						<li><a target="_blank" href="https://work.smarchal.com/twbscolor/"><span class="glyphicon glyphicon-hand-right"></span> Make Your Own Bootstrap Nav</a></li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
 </div>
 <br>
 <footer style="background-color:#ddd; padding: 20px 0;">
 	<div class="container">
 		<p>
 			<a target="_blank" href="https://github.com/Otakuwizard">GitHub</a> -
-			<a target_"_blank" href="http://www.weibo.com/u/2319626291?refer_flag=1001030101_&is_hot=1">Weibo</a>
+			<a target="_blank" href="http://www.weibo.com/u/2319626291?refer_flag=1001030101_&is_hot=1">Weibo</a>
 		</p>
 		<p>This Website is made by <a target="_blank" href="http://www.weibo.com/u/2319626291">@Feng Zijun</a></p>
 		<p>Email <a href="mailto:fzj890909@gmail.com">fzj890909@gmail</a></p>

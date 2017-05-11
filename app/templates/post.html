@@ -3,31 +3,43 @@
 {% import "_macros.html" as macros %}
 {% block title %}{{ super() }} - Post{% endblock %}
 {% block page_content %}
-<div class="col-md-8">
-	<img class="img-rounded" src="{{ post.author.gravatar() }}">
-	<div class="post-author">
-		<P><a href="{{ url_for('main.profile', username=post.author.user_name) }}">{{ post.author.user_name }}</a></p>
+<img class="img-rounded" src="{{ post.author.gravatar() }}">
+<div class="post-author">
+	<P><a href="{{ url_for('main.profile', username=post.author.user_name) }}">{{ post.author.user_name }}</a></p>
+</div>
+<div class="post-content">
+	<p>{% if post.body_html %}{{ post.body_html | safe }}{% else %}{{ post.body }}{% endif %}</p>
+</div>
+<div class="post-date">
+	<p>created at {{ moment(post.created_at).fromNow() }}</p>
+</div>
+<br>
+<hr>
+<div class="panel panel-success">
+	<div class="panel-heading">
+		<h3 class="panel-title">Comments</h3>
 	</div>
-	<div class="post-content">
-		<p>{% if post.body_html %}{{ post.body_html | safe }}{% else %}{{ post.body }}{% endif %}</p>
-	</div>
-	<div class="post-date">
-		<p>created at {{ moment(post.created_at).fromNow() }}</p>
-	</div>
-	<br>
-	<div id="comments">
+	<div class="panel-body" id ="comments">
 		{% set local = url_for('main.post', id=post.id)+'#comments' %}
 		{% include "_comments.html" %}
 		{% if pagination %}
-			{{ macros.pagination_widget(pagination, endpoint='.post', fragment='#comments', id=post.id) }}
+			<div style="text-align:center">{{ macros.pagination_widget(pagination, endpoint='.post', fragment='#comments', id=post.id) }}</div>
 		{% endif %}
 	</div>
-	<div>
-		{% if current_user.can(Permission.COMMENTS) %}
-		<p>Add Comment</p>
-		{{ wtf.quick_form(form) }}
-		{% endif %}
+</div>
+<div>
+	{% if current_user.can(Permission.COMMENTS) %}
+	<div class="panel panel-info">
+		<div class="panel-heading">
+			<h3 class="panel-title">Add Comment</h3>
+		</div>
+		<div class="panel-body">
+			{{ wtf.quick_form(form) }}
+		</div>
 	</div>
+	{% else %}
+	<h3 style="text-align:center">Please Sign In</h3>
+	{% endif %}
 </div>
 {% endblock %}
 

@@ -45,8 +45,8 @@ class CommentCreateForm(FlaskForm):
     submit = SubmitField('Submit')
     
 class BlogCreateForm(FlaskForm):
-    title = StringField('Title', validations=[Required(), Length(1, 128)])
+    title = StringField('Title', validators=[Required(), Length(1, 128)])
     summary = StringField('Summary')
-    body = PageDownField('Text', validations=[Required()])
+    body = PageDownField('Text', validators=[Required()])
     submit = SubmitField('Submit')
     

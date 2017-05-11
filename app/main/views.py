@@ -294,11 +294,11 @@ def blog(id):
                             blog=blog)
         db.session.add(comment)
         db.session.commit()
-        return redirect(url_for('.blog', id=id))
+        return redirect(url_for('.blog', id=id)+'#comments')
     page = request.args.get('page', 1, type=int)
     pagination = blog.comments.order_by(Comment.created_at.desc()).paginate(page, per_page=current_app.config.get('FLABY_BLOG_COMMENT_PER_PAGE', 10), error_out=False)
     comments = pagination.items
-    return render_template('blog.html', blog=blog, pagination=pagination, comments=comments)
+    return render_template('blog.html', blog=blog, pagination=pagination, comments=comments, form=form)
     
 @main.route('/blog-delete/<id>')
 @login_required

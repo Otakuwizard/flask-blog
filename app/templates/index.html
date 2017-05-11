@@ -6,23 +6,9 @@
 	<h1>Recent Blogs</h1>
 </div>
 <div class="row">
-	<div class="col-md-8">
-		{% include "_blogs.html" %}
+	{% include "_blogs.html" %}
+	<div align="center">
 		{{ macros.pagination_widget(pagination, 'main.index') }}
-	</div>
-	<div class="col-md-4">
-		<div class="panel panel-info">
-			<div class="panel-heading">
-				<h3 class="panel-title">Links</h3>
-			</div>
-			<div class="panel-body">
-				<ul>
-					<li><a href="http://www.http://glyphicons.com/"><span class="glyphicon glyphicon-hand-right"></span> Glyphicons</a></li>
-					<li><a href="http://http://www.liaoxuefeng.com/"><span class="glyphicon glyphicon-hand-right"></span> Python3 Tutorial</a></li>
-					<li><a href="https://work.smarchal.com/twbscolor/"><span class="glyphicon glyphicon-hand-right"></span> Make Your Own Bootstrap Nav</a></li>
-				</ul>
-			</div>
-		</div>
 	</div>
 </div>
 {% endblock %}

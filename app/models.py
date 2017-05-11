@@ -353,13 +353,13 @@ class AnonymousUser(AnonymousUserMixin):
 class Blog(db.Model):
     __tablename__ = 'blogs'
     id = db.Column(db.String(64), primary_key=True, default=generate_id)
-    title = db.Column(db.String(32), nulltable=False)
-    summary = db.Column(db.String(256), nulltable=False)
+    title = db.Column(db.String(32), nullable=False)
+    summary = db.Column(db.String(256), nullable=False)
     body = db.Column(db.Text)
     body_html = db.Column(db.Text)
     author_id = db.Column(db.String(64), db.ForeignKey('users.id'))
     created_at = db.Column(db.DateTime(), default=datetime.utcnow)
-    last_edit = db.Column(db.Datetime(), default=datetime.utcnow)
+    last_edit = db.Column(db.DateTime(), default=datetime.utcnow)
     comments = db.relationship('Comment', backref='blog', lazy='dynamic')
     
     def time_update(self):

@@ -44,7 +44,7 @@
 	{% elif user == current_user %}
 	<p><a href="{{ url_for('main.profile_edit') }}"><span class="glyphicon glyphicon-edit"></span> Profile Edit</a></p>
 	{% endif %}
-<div>
+</div>
 <div>
 	<p>Posts created by {{ user.user_name }}:</p>
 	{% include "_posts.html" %}
