@@ -1,7 +1,7 @@
 from flask_script import Manager, Shell
 from flask_migrate import Migrate, MigrateCommand
 from app import create_app, db
-from app.models import User, Role, Post, Comment, Follow
+from app.models import User, Role, Post, Comment, Follow, Tag, Blog, UserLike
 import os
 
 app = create_app(os.environ.get('FLABY_CONFIG') or 'default')
@@ -15,7 +15,7 @@ if os.environ.get('FLABY_COVERAGE'):
     COV.start()
 
 def make_shell_context():
-    return dict(User=User, Role=Role, Post=Post, Comment=Comment, Follow=Follow, db=db, app=app)
+    return dict(User=User, Role=Role, Post=Post, Comment=Comment, Follow=Follow, Blog=Blog, Tag=Tag, UserLike=UserLike, db=db, app=app)
     
 @manager.command
 def test(coverage=False):

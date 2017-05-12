@@ -32,7 +32,38 @@ class Follow(db.Model):
     followed_id = db.Column(db.String(64), db.ForeignKey('users.id'))
     follower_id = db.Column(db.String(64), db.ForeignKey('users.id'))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-  
+    
+class UserLike(db.Model):
+    __tablename__ = 'userlikes'
+    id = db.Column(db.String(64), primary_key=True, default=generate_id)
+    user_id = db.Column(db.String(64), db.ForeignKey('users.id'))
+    liked_post_id = db.Column(db.String(64), db.ForeignKey('posts.id'))
+    disliked_post_id = db.Column(db.String(64), db.ForeignKey('posts.id'))
+    liked_blog_id = db.Column(db.String(64), db.ForeignKey('blogs.id'))
+    disliked_blog_id = db.Column(db.String(64), db.ForeignKey('blogs.id'))
+    created_at = db.Column(db.DateTime(), default=datetime.utcnow)
+    
+blog_tags = db.Table('blog_tags', 
+    db.Column('blog_id', db.String(64), db.ForeignKey('blogs.id')),
+    db.Column('tag_id', db.String(64), db.ForeignKey('tags.id'))
+)
+
+class Tag(db.Model):
+    __tablename__ = 'tags'
+    id = db.Column(db.String(64), primary_key=True, default=generate_id)
+    name = db.Column(db.String(32), unique=True)
+    blogs = db.relationship('Blog', secondary='blog_tags', 
+                            backref=db.backref('tags', lazy='dynamic'),
+                            lazy='dynamic')
+                            
+    @staticmethod
+    def insert_tags():
+        tags = ['Python', 'Node.js', 'JavaScript', 'HTML', 'CSS', 'SQL', 'mySQL']
+        for t in tags:
+            tag = Tag(id=generate_id(), name=t)
+            db.session.add(tag)
+        db.session.commit()
+    
 class Role(db.Model):
     __tablename__ = 'roles'
     id = db.Column(db.String(64), primary_key=True, default=generate_id)
@@ -78,6 +109,7 @@ class User(UserMixin, db.Model):
     followed = db.relationship('Follow', foreign_keys=[Follow.follower_id], backref=db.backref('follower', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')
     followers = db.relationship('Follow', foreign_keys=[Follow.followed_id], backref=db.backref('followed', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')
     blogs = db.relationship('Blog', backref='author', lazy='dynamic')
+    dis_or_likes = db.relationship('UserLike', backref='user', lazy='dynamic')
     
     def __init__(self, **kw):
         super(User, self).__init__(**kw)
@@ -236,6 +268,70 @@ class User(UserMixin, db.Model):
                     location=json_post.get('location'),
                     name=json_post.get('name'))
         return user
+        
+    def like_post(self, post):
+        if self.is_like_post(post):
+            return
+        if self.is_dislike_post(post):
+            dislike = self.dis_or_likes.filter_by(disliked_post_id=post.id).first()
+            db.session.delete(dislike)
+            db.session.commit()
+        like = UserLike(id=generate_id(),
+                        user=self,
+                        liked_post=post)
+        db.session.add(like)
+        db.session.commit()
+        
+    def dislike_post(self, post):
+        if self.is_dislike_post(post):
+            return
+        if self.is_like_post(post):
+            like = self.dis_or_likes.filter_by(liked_post_id=post.id).first()
+            db.session.delete(like)
+            db.session.commit()
+        dislike = UserLike(id=generate_id(),
+                            user=self,
+                            disliked_post=post)
+        db.session.add(dislike)
+        db.session.commit()
+        
+    def is_like_post(self, post):
+        return self.dis_or_likes.filter_by(liked_post_id=post.id).first() is not None
+        
+    def is_dislike_post(self, post):
+        return self.dis_or_likes.filter_by(disliked_post_id=post.id).first() is not None
+        
+    def like_blog(self, id):
+        if self.is_like_blog(id):
+            return
+        if self.is_dislike_blog(id):
+            dislike = self.dis_or_likes.filter_by(disliked_blog_id=id).first()
+            db.session.delete(dislike)
+            db.session.commit()
+        like = UserLike(id=generate_id(),
+                        user=self,
+                        liked_blog_id=id)
+        db.session.add(like)
+        db.session.commit()
+        
+    def dislike_blog(self, id):
+        if self.is_dislike_blog(id):
+            return
+        if self.is_like_blog(id):
+            like = self.dis_or_likes.filter_by(liked_blog_id=id).first()
+            db.session.delete(like)
+            db.session.commit()
+        dislike = UserLike(id=generate_id(),
+                        user=self,
+                        disliked_blog_id=id)
+        db.session.add(dislike)
+        db.session.commit()
+    
+    def is_like_blog(self, id):
+        return self.dis_or_likes.filter_by(liked_blog_id=id).first() is not None
+        
+    def is_dislike_blog(self, id):
+        return self.dis_or_likes.filter_by(disliked_blog_id=id).first() is not None
     
 class Post(db.Model):
     __tablename__ = 'posts'
@@ -246,6 +342,8 @@ class Post(db.Model):
     created_at = db.Column(db.DateTime(), index=True, default=datetime.utcnow)
     author_id = db.Column(db.String(64), db.ForeignKey('users.id'))
     comments = db.relationship('Comment', backref='post', lazy='dynamic')
+    liked = db.relationship('UserLike', foreign_keys=[UserLike.liked_post_id], backref=db.backref('liked_post', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')
+    disliked = db.relationship('UserLike', foreign_keys=[UserLike.disliked_post_id], backref=db.backref('disliked_post', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')
     
     @staticmethod
     def on_changed_body(target, value, oldvalue, initiator):
@@ -361,6 +459,8 @@ class Blog(db.Model):
     created_at = db.Column(db.DateTime(), default=datetime.utcnow)
     last_edit = db.Column(db.DateTime(), default=datetime.utcnow)
     comments = db.relationship('Comment', backref='blog', lazy='dynamic')
+    liked = db.relationship('UserLike', foreign_keys=[UserLike.liked_blog_id], backref=db.backref('liked_blog', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')
+    disliked = db.relationship('UserLike', foreign_keys=[UserLike.disliked_blog_id], backref=db.backref('disliked_blog', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')
     
     def time_update(self):
         self.last_edit = datetime.utcnow()
@@ -369,6 +469,13 @@ class Blog(db.Model):
     def on_changed_body(target, value, oldvalue, initiator):
         allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code', 'em', 'i', 'li', 'ol', 'pre', 'strong', 'ul', 'h1', 'h2', 'h3', 'p']
         target.body_html = bleach.linkify(bleach.clean(markdown(value, output_format='html'), tags=allowed_tags, strip=True))
+        
+    def add_tag(self, tag):
+        if self.tags.get(tag.id) is not None:
+            return
+        self.tags.append(tag)
+        db.session.add(self)
+        db.session.commit()
         
 login_manager.anonymous_user = AnonymousUser
 db.event.listen(Post.body, 'set', Post.on_changed_body)
