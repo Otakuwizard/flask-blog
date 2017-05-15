@@ -1,6 +1,6 @@
 from flask import render_template, redirect, url_for, request, current_app, flash, make_response
 from flask_login import current_user, login_required
-from ..models import User, Post, Comment, Permission, Follow, Blog
+from ..models import User, Post, Comment, Permission, Follow, Blog, Tag, UserLike
 from . import main
 from ..decrator import permission_required, admin_required
 from .forms import ProfileEditForm, ProfileEditAdminForm, PostCreateForm, CommentCreateForm, BlogCreateForm
@@ -312,3 +312,52 @@ def blog_delete(id):
     db.session.commit()
     flash('Blog has been deleted.')
     return redirect(url_for('main.index'))
+    
+@main.route('/blog-like/<id>')
+@login_required
+def blog_like(id):
+    blog = Blog.query.get_or_404(id)
+    current_user.like_blog(blog.id)
+    return redirect(url_for('main.blog', id=id))
+    
+@main.route('/blog-dislike/<id>')
+@login_required
+def blog_dislike(id):
+    blog = Blog.query.get_or_404(id)
+    current_user.dislike_blog(blog.id)
+    return redirect(url_for('main.blog', id=id))
+    
+@main.route('/post-like/<id>')
+@login_required
+def post_like(id):
+    post = Post.query.get_or_404(id)
+    page = request.args.get('page', 1, type=int)
+    current_user.like_post(post)
+    return redirect(url_for('main.twitter', page=page))
+    
+@main.route('/post-dislike/<id>')
+@login_required
+def post_dislike(id):
+    post = post.query.get_or_404(id)
+    page = request.args.get('page', 1, type=int)
+    current_user.dislike_post(post)
+    return redirect(url_for('main.twitter', page=page))
+    
+@main.route('/blog/add-tag/<blog_id><tag_id>')
+@login_required
+@admin_required
+def add_tag(blog_id, tag_id):
+    blog = Blog.query.get_or_404(blog_id)
+    tag = Tag.query.get_or_404(tag_id)
+    blog.add_tag(tag)
+    return redirect(url_for('main.blog', id=blog_id))
+    
+@main.route('/blog/delete-tag/<blog_id><tag_id>')
+@login_required
+@admin_required
+def delete_tag(blog_id, tag_id):
+    blog = Blog.query.get_or_404(blog_id)
+    tag = Tag.query.get_or_404(tag_id)
+    blog.delete_tag(tag)
+    return redirect(url_for('main.blog', id=blog_id))
+    

@@ -475,7 +475,12 @@ class Blog(db.Model):
             return
         self.tags.append(tag)
         db.session.add(self)
-        db.session.commit()
+        
+    def delete_tag(self, tag):
+        if self.tags.get(tag.id) is None:
+            return
+        self.tags.remove(tag)
+        db.session.add(self)
         
 login_manager.anonymous_user = AnonymousUser
 db.event.listen(Post.body, 'set', Post.on_changed_body)
