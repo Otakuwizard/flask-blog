@@ -333,15 +333,15 @@ def post_like(id):
     post = Post.query.get_or_404(id)
     page = request.args.get('page', 1, type=int)
     current_user.like_post(post)
-    return redirect(url_for('main.twitter', page=page))
+    return redirect(request.args.get('local') or url_for('main.twitter', page=page))
     
 @main.route('/post-dislike/<id>')
 @login_required
 def post_dislike(id):
-    post = post.query.get_or_404(id)
+    post = Post.query.get_or_404(id)
     page = request.args.get('page', 1, type=int)
     current_user.dislike_post(post)
-    return redirect(url_for('main.twitter', page=page))
+    return redirect(request.args.get('local') or url_for('main.twitter', page=page))
     
 @main.route('/blog/add-tag/<blog_id><tag_id>')
 @login_required

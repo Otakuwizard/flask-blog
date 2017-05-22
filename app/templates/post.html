@@ -2,6 +2,7 @@
 {% import "bootstrap/wtf.html" as wtf %}
 {% import "_macros.html" as macros %}
 {% block title %}{{ super() }} - Post{% endblock %}
+{% set local = url_for('main.post', id=post.id)+'#comments' %}
 {% block page_content %}
 <img class="img-rounded" src="{{ post.author.gravatar() }}">
 <div class="post-author">
@@ -13,6 +14,12 @@
 <div class="post-date">
 	<p>created at {{ moment(post.created_at).fromNow() }}</p>
 </div>
+{% if current_user.is_authenticated %}
+<p>
+	<a href="{{ url_for('main.post_like', id=post.id, local=local) }}" class="btn btn-info btn-sm"><span class="glyphicon glyphicon-thumbs-up"></span> <span class="bagde">{{ post.liked.count() }}</span></a>
+	<a href="{{ url_for('main.post_dislike', id=post.id, local=local) }}" class="btn btn-info btn-sm"><span class="glyphicon glyphicon-thumbs-down"></span> <span class="bagde">{{ post.disliked.count() }}</span></a>
+</p>
+{% endif %}
 <br>
 <hr>
 <div class="panel panel-success">
@@ -20,7 +27,6 @@
 		<h3 class="panel-title">Comments</h3>
 	</div>
 	<div class="panel-body" id ="comments">
-		{% set local = url_for('main.post', id=post.id)+'#comments' %}
 		{% include "_comments.html" %}
 		{% if pagination %}
 			<div style="text-align:center">{{ macros.pagination_widget(pagination, endpoint='.post', fragment='#comments', id=post.id) }}</div>

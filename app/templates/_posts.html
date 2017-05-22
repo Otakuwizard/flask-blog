@@ -26,6 +26,14 @@
 				{% endif %}
 			</div>
 			<div class="post-footer">
+				{% if current_user.is_authenticated %}
+				<a href="{{ url_for('main.post_like', id=post.id) }}">
+					<span class="label label-info">{{ post.liked.count() }} Like</span>
+				</a>
+				<a href="{{ url_for('main.post_dislike', id=post.id) }}">
+					<span class="label label-info">{{ post.disliked.count() }} Dislike</span>
+				</a>
+				{% endif %}
 				{% if current_user.is_administrator() %}
 				<a href="{{ url_for('main.post_edit', id=post.id) }}">
 					<span class="label label-danger">Edit[Admin]</span>

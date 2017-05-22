@@ -10,12 +10,16 @@
 <p>{% if blog.body_html %}{{ blog.body_html | safe }}{% else %}{{ blog.body }}{% endif %}</p>
 <br>
 <p style="float:left"><i>Published at {{ moment(blog.created_at).format('L') }}</i></p>
-<p style="float:right"><i class="text-right">Last edited at {{ moment(blog.last_edit).fromNow() }}</i></p> 
+<p style="float:right"><i>Last edited at {{ moment(blog.last_edit).fromNow() }}</i></p> 
 <hr>
-{% if current_user == blog.author %}
+{% if current_user.is_authenticated %}
 <p style="text-align:right">
+	<a href="{{ url_for('main.blog_like', id=blog.id) }}" class="btn btn-info btn-sm"><span class="glyphicon glyphicon-thumbs-up"></span> <span class="bagde">{{ blog.liked.count() }}</span></a>
+	<a href="{{ url_for('main.blog_dislike', id=blog.id) }}" class="btn btn-info btn-sm"><span class="glyphicon glyphicon-thumbs-down"></span> <span class="bagde">{{ blog.disliked.count() }}</span></a>
+	{% if current_user == blog.author %}
 	<a href="{{ url_for('main.blog_edit', id=blog.id) }}" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-edit"></span> Edit</a> 
 	<a href="{{ url_for('main.blog_delete', id=blog.id) }}" class="btn btn-danger btn-sm"><span class="glyphicon glyphicon-trash"></span> Delete</a>
+	{% endif %}
 </p>
 {% endif %}
 <div class="panel panel-success">
@@ -23,8 +27,13 @@
 		<h3 class="panel-title">Comments</h3>
 	</div>
 	<div id="comments" class="panel-body">
+		{% set local = url_for('main.blog', id=blog.id)+'#comments' %}
 		{% include "_comments.html" %}
-		{{ macros.pagination_widget(pagination, 'main.blog', '#comments', id=blog.id)}}
+		{% if pagination %}
+		<div style="text-align:center">
+			{{ macros.pagination_widget(pagination, 'main.blog', '#comments', id=blog.id)}}
+		</div>
+		{% endif %}
 	</div>
 </div>
 <div class="panel panel-primary {% if not current_user.is_authenticated %}disabled{% endif %}">

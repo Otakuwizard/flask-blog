@@ -50,6 +50,8 @@ def deploy():
     
     User.insert_self_follow()
     
+    Tag.insert_tags()
+    
         
 manager.add_command('shell', Shell(make_context=make_shell_context))
 manager.add_command('db', MigrateCommand)
