@@ -12,6 +12,7 @@
 <p style="float:left"><i>Published at {{ moment(blog.created_at).format('L') }}</i></p>
 <p style="float:right"><i>Last edited at {{ moment(blog.last_edit).fromNow() }}</i></p> 
 <hr>
+<p><a href="#" class="btn btn-primary btn-sm" id="tags">add tags</a></p>
 {% if current_user.is_authenticated %}
 <p style="text-align:right">
 	<a href="{{ url_for('main.blog_like', id=blog.id) }}" class="btn btn-info btn-sm"><span class="glyphicon glyphicon-thumbs-up"></span> <span class="bagde">{{ blog.liked.count() }}</span></a>
@@ -53,4 +54,29 @@
 {% block scripts %}
 {{ super() }}
 {{ pagedown.include_pagedown() }}
+<script type="text/javascript">
+$(function(){
+	var add_tags = $('#tags');
+	add_tags.click(function(e){
+		e.preventDefault();
+		var new_win = window.open('', '', 'height=400, width=800, top=200, left=500, toolbar=no, menubar=no, scrollbars=no, resizable=no, status=no, location=no');
+		new_win.document.write('<html><head><title>New Win</title></head><body><h1></h1></body></html>');
+		var body = new_win.document.getElementsByTagName('body')[0];
+		var h1 = new_win.document.getElementsByTagName('h1')[0];
+		h1.innerText = 'Choose Tags';
+		var text_input = new_win.document.createElement('input');
+		text_input.setAttribute('type', 'text');
+		var btn1 = new_win.document.createElement('button');
+		btn1.setAttribute('id', 'btn1');
+		btn1.innerText = 'submit';
+		body.appendChild(text_input);
+		body.appendChild(btn1);
+		new_win.document.close();
+		$(btn1).click(function(){
+			new_win.close();
+			alert(text_input.value);
+		});
+	})
+});
+</script>
 {% endblock %}
