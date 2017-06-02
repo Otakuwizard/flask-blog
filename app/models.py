@@ -58,7 +58,7 @@ class Tag(db.Model):
                             
     @staticmethod
     def insert_tags():
-        tags = ['Python', 'Node.js', 'JavaScript', 'HTML', 'CSS', 'SQL', 'mySQL']
+        tags = ['Python', 'Node.js', 'JavaScript', 'HTML', 'CSS', 'SQL', 'mySQL', 'R']
         for t in tags:
             tag = Tag.query.filter_by(name=t).first()
             if tag is not None:
