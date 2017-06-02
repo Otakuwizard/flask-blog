@@ -1,6 +1,6 @@
 from flask import render_template, redirect, url_for, request, current_app, flash, make_response
 from flask_login import current_user, login_required
-from ..models import User, Post, Comment, Permission, Follow, Blog, Tag, UserLike
+from ..models import User, Post, Comment, Permission, Follow, Blog, Tag, UserLike, Role
 from . import main
 from ..decrator import permission_required, admin_required
 from .forms import ProfileEditForm, ProfileEditAdminForm, PostCreateForm, CommentCreateForm, BlogCreateForm
