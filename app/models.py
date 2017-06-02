@@ -60,6 +60,9 @@ class Tag(db.Model):
     def insert_tags():
         tags = ['Python', 'Node.js', 'JavaScript', 'HTML', 'CSS', 'SQL', 'mySQL']
         for t in tags:
+            tag = Tag.query.filter_by(name=t).first()
+            if tag is not None:
+                continue
             tag = Tag(id=generate_id(), name=t)
             db.session.add(tag)
         db.session.commit()
