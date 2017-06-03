@@ -298,7 +298,8 @@ def blog(id):
     page = request.args.get('page', 1, type=int)
     pagination = blog.comments.order_by(Comment.created_at.desc()).paginate(page, per_page=current_app.config.get('FLABY_BLOG_COMMENT_PER_PAGE', 10), error_out=False)
     comments = pagination.items
-    return render_template('blog.html', blog=blog, pagination=pagination, comments=comments, form=form)
+    tags = blog.tags.all()
+    return render_template('blog.html', blog=blog, pagination=pagination, comments=comments, form=form, tags=tags)
     
 @main.route('/blog-delete/<id>')
 @login_required

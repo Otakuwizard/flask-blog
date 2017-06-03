@@ -8,7 +8,7 @@
 </div>
 <p id="tag_labels">
 {% for t in tags %}
-	<span class="label label-info label-sm">t.name</span>
+	<span class="label label-info label-sm">{{ t.name }}</span>
 {% endfor %}
 </p>
 <p>{% if blog.body_html %}{{ blog.body_html | safe }}{% else %}{{ blog.body }}{% endif %}</p>
@@ -69,26 +69,28 @@ $(function(){
 		e.preventDefault();
 		var new_win = window.open('', '', 'height=400, width=800, top=200, left=500, toolbar=no, menubar=no, scrollbars=no, resizable=no, status=no, location=no');
 		new_win.document.write('<html><head><title>New Win</title></head><body><h1></h1><form></form></body></html>');
-		var body = new_win.document.getElementsByTagName('body')[0];
 		var h1 = new_win.document.getElementsByTagName('h1')[0];
 		var form = new_win.document.getElementsByTagName('form')[0];
 		h1.innerText = 'Choose Tags';
-		$.getJSON('/api/v1.0/tags/get').done(function(data){
-			var tags = JSON.parse(data);
+		$.getJSON('/api/v1.0/blog/'+blog_id+'/tags/get').done(function(data){
+			var tags = data;
 			for (let t of tags){
 				var input = new_win.document.createElement('input');
 				input.setAttribute('type', 'checkbox');
 				if (t.selected){
 					input.setAttribute('checked', 'checked');
 				}
-				input.innerTExt = t.name;
-				form.appendchild(input);
+				input.setAttribute('value', t.name);
+				var label = new_win.document.createElement('label');
+				label.innerText = t.name;
+				label.appendChild(input);
+				form.appendChild(label);
 			}
 		});
 		var btn1 = new_win.document.createElement('button');
 		btn1.setAttribute('id', 'btn1');
 		btn1.innerText = 'submit';
-		body.appendChild(btn1);
+		form.appendChild(btn1);
 		new_win.document.close();
 		$(btn1).click(function(event){
 			event.preventDefault();
@@ -97,20 +99,23 @@ $(function(){
 			var selected_tags = [];
 			for (let t of tags){
 				if (t.checked){
-					selected_tags.push(t.innerText);
+					selected_tags.push(t.value);
 				}
 			}
-			$.getJSON('/api/v1.0/tags/update', {
-				'id' : blog_id,
-				'selected_tags' : selected_tags
+			console.log(selected_tags);
+			$.getJSON('/api/v1.0/blog/'+blog_id+'/tags/update', {
+				's' : selected_tags.toString()
 			}).done(function(data){
-				var tgs = JSON.parse(data);
+				/*var tgs = data;
 				var p = $('#tag_labels');
 				var tag_labels = $('#tag_labels span');
 				tag_labels.remove();
 				for (let t of tgs){
-					p.append(`<span class="label labels-info label-sm">${t.name}</span>`);
+					p.append(`<span class="label label-info label-sm"> ${t.name} </span>`);
 				}
+				*/
+
+				location.assign("{{url_for('main.blog', id=blog.id)}}");
 			});
 		});
 	});

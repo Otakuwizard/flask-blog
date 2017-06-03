@@ -66,6 +66,14 @@ class Tag(db.Model):
             tag = Tag(id=generate_id(), name=t)
             db.session.add(tag)
         db.session.commit()
+
+    def to_json(self):
+        json_tag = {
+            'name': self.name,
+            'blogs_count': self.blogs.count(),
+            'selected': False
+        }
+        return json_tag
     
 class Role(db.Model):
     __tablename__ = 'roles'
@@ -474,13 +482,13 @@ class Blog(db.Model):
         target.body_html = bleach.linkify(bleach.clean(markdown(value, output_format='html'), tags=allowed_tags, strip=True))
         
     def add_tag(self, tag):
-        if self.tags.get(tag.id) is not None:
+        if self.tags.filter_by(name=tag.name).first() is not None:
             return
         self.tags.append(tag)
         db.session.add(self)
         
     def delete_tag(self, tag):
-        if self.tags.get(tag.id) is None:
+        if self.tags.filter_by(name=tag.name).first() is None:
             return
         self.tags.remove(tag)
         db.session.add(self)
