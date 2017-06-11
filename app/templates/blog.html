@@ -72,6 +72,9 @@ $(function(){
 		var h1 = new_win.document.getElementsByTagName('h1')[0];
 		var form = new_win.document.getElementsByTagName('form')[0];
 		h1.innerText = 'Choose Tags';
+		var btn1 = new_win.document.createElement('button');
+		btn1.setAttribute('id', 'btn1');
+		btn1.innerText = 'submit';
 		$.getJSON('/api/v1.0/blog/'+blog_id+'/tags/get').done(function(data){
 			var tags = data;
 			for (let t of tags){
@@ -86,11 +89,10 @@ $(function(){
 				label.appendChild(input);
 				form.appendChild(label);
 			}
+			var p = new_win.document.createElement('p');
+			form.appendChild(p);
+			form.appendChild(btn1);
 		});
-		var btn1 = new_win.document.createElement('button');
-		btn1.setAttribute('id', 'btn1');
-		btn1.innerText = 'submit';
-		form.appendChild(btn1);
 		new_win.document.close();
 		$(btn1).click(function(event){
 			event.preventDefault();
@@ -102,7 +104,6 @@ $(function(){
 					selected_tags.push(t.value);
 				}
 			}
-			console.log(selected_tags);
 			$.getJSON('/api/v1.0/blog/'+blog_id+'/tags/update', {
 				's' : selected_tags.toString()
 			}).done(function(data){
