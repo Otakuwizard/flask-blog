@@ -2,8 +2,13 @@
 	{% for blog in blogs %}
 	<li>
 		<article>
+			<p style="float:right"><i>Published at {{ moment(blog.created_at).fromNow() }}</i></p>
 			<p><h3><a href="{{ url_for('main.blog', id=blog.id) }}">{{ blog.title }}</a></h3></p>
-			<p style="text-align:right"><i>Published at {{ moment(blog.created_at).fromNow() }}</i></p>
+			<p>
+			{% for tag in blog.tags %}
+				<span class="label label-info label-sm">{{ tag.name }}</span>
+			{% endfor %}
+			</p>
 			<p>{{ blog.summary }}</p>
 			<p>
 				<a href="{{ url_for('main.blog', id=blog.id) }}" class="btn btn-primary btn-xs">read more</a>
