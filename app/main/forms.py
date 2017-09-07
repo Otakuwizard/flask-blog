@@ -55,4 +55,4 @@ class PurchaseAddForm(FlaskForm):
     purchase_describe = TextAreafield('Describe')
     transporter = StringField('Delivery by')
     track_code = StringField('Track code')
-    submit = Submit('Add')
+    submit = SubmitField('Add')
