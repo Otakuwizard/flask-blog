@@ -8,7 +8,6 @@ from datetime import datetime
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from markdown import markdown
 import bleach
-import hashlib
 from . import login_manager
 from app.exceptions import ValidationError
 
@@ -492,7 +491,16 @@ class Blog(db.Model):
             return
         self.tags.remove(tag)
         db.session.add(self)
-        
+
+class Purchase(db.Model):
+    __tablename__ = 'purchases'
+    id = db.Column(db.String(64), primary_key=True, default=generate_id)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    order_time = db.Column(db.Datetime)
+    wares = db.Column(db.Text())
+    transporter = db.Column(db.String(32))
+    track_code = db.Column(db.String(64))
+
 login_manager.anonymous_user = AnonymousUser
 db.event.listen(Post.body, 'set', Post.on_changed_body)
 db.event.listen(Comment.body, 'set', Comment.on_changed_body)

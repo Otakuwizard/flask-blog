@@ -50,3 +50,9 @@ class BlogCreateForm(FlaskForm):
     body = PageDownField('Text', validators=[Required()])
     submit = SubmitField('Submit')
     
+class PurchaseAddForm(FlaskForm):
+    order_time = StringField('Order at')
+    purchase_describe = TextAreafield('Describe')
+    transporter = StringField('Delivery by')
+    track_code = StringField('Track code')
+    submit = Submit('Add')
